@@ -5,7 +5,7 @@ output: presentation.html
 # FP Fundamentals
 ## Functors, monads and more
 <br>
-<center><small>Tom Duncalf | <a href='https://twitter.com/tomduncalf'>@tomduncalf</a></small></center>
+<center><small>Tom Duncalf | <a href='mailto:tom@tomduncalf.com'>tom@tomduncalf.com</a> | <a href='https://twitter.com/tomduncalf'>@tomduncalf</a></small></center>
 
 --
 
@@ -42,6 +42,10 @@ output: presentation.html
 --
 
 # Basic concepts
+
+--
+
+### First class functions
 
 --
 
@@ -131,6 +135,26 @@ var getServerStuff = ajaxCall;
 * Less code, more readable
 * Easier to change function arguments - no need to update in multiple places
 * Reduces the need to name arguments which allows us to write more generic code - common theme in FP
+
+```javascript
+// specific to our current blog
+var validArticles = function(articles) {
+  return articles.filter(function(article){
+    return article !== null && article !== undefined;
+  });
+};
+
+// vastly more relevant for future projects
+var compact = function(xs) {
+  return xs.filter(function(x) {
+    return x !== null && x !== undefined;
+  });
+};
+```
+
+---
+
+### Pure functions
 
 ---
 

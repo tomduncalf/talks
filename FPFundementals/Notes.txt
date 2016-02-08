@@ -1,0 +1,95 @@
+Pure functions
+
+- Definition
+  - slice vs splice
+  - depending on factors external to input
+    - reliance on system state is one of the greatest contributors to system complexity
+
+- Side effect: anything that occurs in our computation besides the calculation of a result
+  - "A side effect is a change of system state or an observable interaction that occurs during the calculation of a result"
+  - Examples:
+    - changing the file system
+    - inserting a record in a database
+    - making an http call
+    - printing to the screen...
+  - Any interaction with the world outside of a function is a side effect
+  - FP postulates that side effects are a primary cause of incorrect behaviour
+  - How can we practically write programs without side effects?!
+  - This isn't the aim - we want to contain side effects and run them in a controlled manner
+    - "Push them to the outside"
+
+  - Pure functions should always return the same output given the same input, which is not possible to guarantee when dealing with the world outside the function
+
+- Mathematical definition of a function: a special relationship between values: each of its input values gives back exactly one output value
+  - [ diagram ]
+  - Pure functions are mathematical functions
+
+- Benefits:
+  - Cacheable (memoization) - we know the same input will always give the same output so it is trivial to cache results [example]
+    - We can even transform some impure functions into pure ones by delaying evaluation [example]
+      - We don't make the call, but return a function which does so when called - same input will always return same function, so still pure
+      - We will see how to use this later
+
+  - Portable: a function's dependencies are explicit [example]
+    - All the context needed to run a function is passed in at call time so e.g. the function could trivially be run remotely or in a web worker
+    - Gorilla quote?
+
+  - Testable: we don't need to mock complex dependencies, we just assert outputs given inputs
+
+  - Referential transparency: code can be sustituted for its generated value without changing the behaviour of the program - helps us refactor and reason about the code
+
+  - Parallelisable: pure functions do not need access to shared memory and cannot by definition have race conditions due to side effects
+
+---
+
+Currying
+
+- Writing programs with pure functions can be quite laborious, for example due to overhead of passing arguments around
+- Currying can help us
+- A curried function can be called with fewer arguments than it expects, and will return a function that takes the remaining arguments [example] - known as partial application
+  - curry exists in lodash, ramda
+  - show example curried map, filter, etc
+
+- This lets us easily make new functions which apply to our domain
+- We can transform any function that works on single elements into one that works on arrays by wrapping with (curried) map [show vs without curried map]
+  - We don't usually write two functions - just supply one that can be called with map(fn) inline
+
+- How does this fit with pure functions?
+  - Each single argument of the function returns a new function expecting the remaining arguments
+  - Always the same for the same input, so pure - still fits the mathematical definition
+  - Allowing more than one argument at a time e.g. in JS can be seen as a convenience
+
+---
+
+Composition
+
+- [show compose function] [show example]
+- Composing two functions return a new function, which 'pipes' the input through both functions (right to left)
+  - More readable than nested function calls [show example]
+  - Typically right to left because it mirrors the mathematical version more closely
+  - Real compose is variadic (takes n arguments)
+- Mathematical property: associativity
+  - Allows us to extract and group functions into their own compositions as we please, knowing the result will be the same
+  - [show example]
+
+---
+
+Pointfree
+
+- Pointfree style means that functions never mention the data upon which they operate
+  - Ties in with first class functions, currying and composition
+  - [show example]
+- Helps us remove needless names and keep code concise, but can be harder to read - use where appropriate
+
+---
+
+Debugging - skip?
+
+---
+
+Category theory - skipping but maybe show a slide
+- Mathematical basis behind a lot of this
+
+---
+
+
