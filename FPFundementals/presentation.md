@@ -30,18 +30,72 @@ output: presentation.html
 
 ### Concepts we'll cover
 
-* First class functions
 * Pure functions
+* First class functions
+* Hindley-Milner type signatures
 * Currying
 * Composition
-* Point-free style
-* Hindley-Milner type signatures
+* Pointfree style
 * Functors
 * Monads
 
 --
 
-# Basic concepts
+### Pure functions
+
+--
+
+### Pure functions
+
+* A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.
+
+--
+
+### Pure functions
+
+* <span style='opacity:0.3'>A pure function is a function that, </span>given the same input, will always return the same output <span style='opacity:0.3'>and does not have any observable side effect.</span>
+<center><img src='function.gif' height='30%'></center>
+
+--
+
+### Pure functions
+
+* A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.
+<center><img src='function.gif' height='30%'></center>
+* No dependence on factors external to the input
+* "Side effects are a primary cause of incorrect behaviour"
+
+---
+
+### Pure functions
+
+* Side effect: "anything that occurs in our computation besides the calculation of a result":
+  * changing the file system
+  * inserting a record into a database
+  * making an http call
+  * printing to the screen / logging
+  * obtaining user input
+  * querying the DOM
+  * any interaction with the world outside of the function!
+
+--
+
+### Pure functions
+
+* How can we program without side effects?
+  * We can't - we aim to control them and run them in a controlled manner
+  * more on this later...
+
+--
+
+### Benefits of pure functions
+
+* Benefits:
+  * <b>Cacheable</b> (memoization): we know the same input will always give the same output
+  * <b>Portable</b>: a function's dependencies are explicit
+  * <b>Testable</b>: we don't need to mock complex dependencies, just assert outputs given inputs
+  * <b>Referential transparency</b>: code can be substituted for its generated value
+  * <b>Parallelisable</b>: do not need access to shared memory, no race conditions
 
 --
 
@@ -71,7 +125,7 @@ var greeting = hi;
 
 * Wrapping `function` is not needed
 
----
+--
 
 ### First class functions
 
@@ -87,7 +141,7 @@ var getServerStuff = function(callback){
 var getServerStuff = ajaxCall;
 ```
 
----
+--
 
 ### First class functions
 
@@ -99,7 +153,7 @@ var getServerStuff = ajaxCall;
   });
 ```
 
----
+--
 
 ### First class functions
 
@@ -114,7 +168,7 @@ var getServerStuff = ajaxCall;
   return ajaxCall(callback)
 ```
 
----
+--
 
 ### First class functions
 
@@ -128,7 +182,7 @@ var getServerStuff = function(callback){
 var getServerStuff = ajaxCall;
 ```
 
----
+--
 
 ### First class functions
 
@@ -152,12 +206,6 @@ var compact = function(xs) {
 };
 ```
 
----
+--
 
-### Pure functions
-
----
-
-### Pure functions
-
-* A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.
+### Hindley-Milner type signatures

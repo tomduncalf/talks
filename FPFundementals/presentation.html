@@ -391,26 +391,90 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
   <div class="slide hidden" id="slide-4">
     <section class="slide-content"><h3 id="concepts-we-ll-cover">Concepts we&#39;ll cover</h3>
 <ul>
-<li>First class functions</li>
 <li>Pure functions</li>
+<li>First class functions</li>
+<li>Hindley-Milner type signatures</li>
 <li>Currying</li>
 <li>Composition</li>
-<li>Point-free style</li>
-<li>Hindley-Milner type signatures</li>
+<li>Pointfree style</li>
 <li>Functors</li>
 <li>Monads</li>
 </ul>
 </section>
   </div>
   <div class="slide hidden" id="slide-5">
-    <section class="slide-content"><h1 id="basic-concepts">Basic concepts</h1>
+    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
 </section>
   </div>
   <div class="slide hidden" id="slide-6">
-    <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
+    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
+<ul>
+<li>A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.</li>
+</ul>
 </section>
   </div>
   <div class="slide hidden" id="slide-7">
+    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
+<ul>
+<li><span style='opacity:0.3'>A pure function is a function that, </span>given the same input, will always return the same output <span style='opacity:0.3'>and does not have any observable side effect.</span><center><img src='function.gif' height='30%'></center></li>
+</ul>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-8">
+    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
+<ul>
+<li>A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.<center><img src='function.gif' height='30%'></center></li>
+<li>No dependence on factors external to the input</li>
+<li>&quot;Side effects are a primary cause of incorrect behaviour&quot;</li>
+</ul>
+</section>
+  </div>
+  <div class="slide hidden -" id="slide-9">
+    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
+<ul>
+<li>Side effect: &quot;anything that occurs in our computation besides the calculation of a result&quot;:<ul>
+<li>changing the file system</li>
+<li>inserting a record into a database</li>
+<li>making an http call</li>
+<li>printing to the screen / logging</li>
+<li>obtaining user input</li>
+<li>querying the DOM</li>
+<li>any interaction with the world outside of the function!</li>
+</ul>
+</li>
+</ul>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-10">
+    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
+<ul>
+<li>How can we program without side effects?<ul>
+<li>We can&#39;t - we aim to control them and run them in a controlled manner</li>
+<li>more on this later...</li>
+</ul>
+</li>
+</ul>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-11">
+    <section class="slide-content"><h3 id="benefits-of-pure-functions">Benefits of pure functions</h3>
+<ul>
+<li>Benefits:<ul>
+<li><b>Cacheable</b> (memoization): we know the same input will always give the same output</li>
+<li><b>Portable</b>: a function&#39;s dependencies are explicit</li>
+<li><b>Testable</b>: we don&#39;t need to mock complex dependencies, just assert outputs given inputs</li>
+<li><b>Referential transparency</b>: code can be substituted for its generated value</li>
+<li><b>Parallelisable</b>: do not need access to shared memory, no race conditions</li>
+</ul>
+</li>
+</ul>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-12">
+    <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
+</section>
+  </div>
+  <div class="slide hidden" id="slide-13">
     <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
 <ul>
 <li>Functions are treated just like any other data type</li>
@@ -433,7 +497,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 </ul>
 </section>
   </div>
-  <div class="slide hidden -" id="slide-8">
+  <div class="slide hidden" id="slide-14">
     <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
 <pre><code class="lang-javascript"><span class="hljs-comment">// This:</span>
 <span class="hljs-keyword">var</span> getServerStuff = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">callback</span>)</span>{
@@ -446,7 +510,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <span class="hljs-keyword">var</span> getServerStuff = ajaxCall;</code></pre>
 </section>
   </div>
-  <div class="slide hidden -" id="slide-9">
+  <div class="slide hidden" id="slide-15">
     <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
 <pre><code class="lang-javascript">
 
@@ -455,7 +519,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
   });</code></pre>
 </section>
   </div>
-  <div class="slide hidden -" id="slide-10">
+  <div class="slide hidden" id="slide-16">
     <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
 <pre><code class="lang-javascript">
   <span class="hljs-comment">// This:</span>
@@ -467,7 +531,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
   <span class="hljs-keyword">return</span> ajaxCall(callback)</code></pre>
 </section>
   </div>
-  <div class="slide hidden -" id="slide-11">
+  <div class="slide hidden" id="slide-17">
     <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
 <pre><code class="lang-javascript"><span class="hljs-comment">// This:</span>
 <span class="hljs-keyword">var</span> getServerStuff = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">callback</span>)</span>{
@@ -478,7 +542,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <span class="hljs-keyword">var</span> getServerStuff = ajaxCall;</code></pre>
 </section>
   </div>
-  <div class="slide hidden -" id="slide-12">
+  <div class="slide hidden" id="slide-18">
     <section class="slide-content"><h3 id="first-class-functions">First class functions</h3>
 <ul>
 <li>Less code, more readable</li>
@@ -500,15 +564,8 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 };</code></pre>
 </section>
   </div>
-  <div class="slide hidden -" id="slide-13">
-    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
-</section>
-  </div>
-  <div class="slide hidden -" id="slide-14">
-    <section class="slide-content"><h3 id="pure-functions">Pure functions</h3>
-<ul>
-<li>A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.</li>
-</ul>
+  <div class="slide hidden" id="slide-19">
+    <section class="slide-content"><h3 id="hindley-milner-type-signatures">Hindley-Milner type signatures</h3>
 </section>
   </div>
 

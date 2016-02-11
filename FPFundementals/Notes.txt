@@ -71,6 +71,11 @@ Composition
 - Mathematical property: associativity
   - Allows us to extract and group functions into their own compositions as we please, knowing the result will be the same
   - [show example]
+  - Relates to category theory (collection of objects, collection of morphisms, notion of composition [graphic])
+
+* declarative specs
+
+Map composition law: var law = compose(map(f), map(g)) == map(compose(f, g));
 
 ---
 
@@ -92,4 +97,22 @@ Category theory - skipping but maybe show a slide
 
 ---
 
+Monads/functors - make errors first class
 
+
+---
+
+Mondas
+
+var upload = compose(map... upload) example
+
+
+"dynamic type safety"
+
+
+Idea:
+
+Take an email address and get a greeting from it
+
+Split it on @, if it contains a dot split on the dot and capitalize each part
+Otherwise take the first letter and split and return "A. Whatever"
