@@ -111,22 +111,21 @@ class: center, middle
 
 ---
 
-### Benefits of pure functions
+### Why pure functions?
 
-* Benefits:
-  * <b>Cacheable</b> (memoization): we know the same input will always give the same output
+* <b>Cacheable</b> (memoization): we know the same input will always give the same output
 --
 
-  * <b>Portable</b>: a function's dependencies are explicit
+* <b>Portable</b>: a function's dependencies are explicit
 --
 
-  * <b>Testable</b>: we don't need to mock complex dependencies, just assert outputs given inputs
+* <b>Testable</b>: we don't need to mock complex dependencies, just assert outputs given inputs
 --
 
-  * <b>Referential transparency</b>: code can be substituted for its generated value
+* <b>Referential transparency</b>: code can be substituted for its generated value
 --
 
-  * <b>Parallelisable</b>: do not need access to shared memory, no race conditions
+* <b>Parallelisable</b>: do not need access to shared memory, no race conditions
 
 ---
 
@@ -135,9 +134,11 @@ class: center, middle
 --
 
 * Specifies what types of inputs a function takes and what type it returns
-
 --
+
 * JS has no type checking but useful for documentation
+* Can often understand what a function does just from name and type signature
+* Can be useful for searching for a function e.g. Ramda docs, Hoogle
 
 ---
 
@@ -195,7 +196,7 @@ const transformArray = (inputArray, transformFn) => {
 ### First class functions
 
 * Functions are treated just like any other data type
-* They can be passed around, stored in arrays, etc.
+* They can be passed around, stored in variables, arrays, etc.
 * They are only called when invoked with `()`
 
 --
@@ -228,8 +229,6 @@ const greet = name => hi(name)
 // greet :: String -> String
 const greet = hi
 ```
-
-* Wrapping `function` is not needed
 
 ---
 
@@ -275,7 +274,7 @@ transformArray(['one', 'two', 'three'], length)
 
 ---
 
-### First class functions
+### Why first class functions?
 
 * Less code, more readable
 * Easier to change function arguments - no need to update everywhere
@@ -285,17 +284,100 @@ transformArray(['one', 'two', 'three'], length)
 
 ```
 // Specific to our current domain:
+// validArticles :: [a] -> [a]
 const validArticles = articles => {
   return articles.filter(article => article !== null && article !== undefined)
 }
 
 // Generic and reusable:
+// compact :: [a] -> [a]
 const compact = xs => {
   return xs.filter(x !== null && x !== undefined)
 }
 ```
 
 ---
+
+### Currying
+
+--
+
+* A curried function can be called with fewer arguments than it expects, and will return a function that takes the remaining arguments
+
+---
+
+### Currying
+
+* A curried function can be called with fewer arguments than it expects, and will return a partially applied function that takes the remaining arguments
+
+--
+
+```
+// add :: a -> (a -> a) - e.g. Number -> (Number -> Number)
+const add = (x) => {
+  return (y) => {
+    return x + y
+  }
+}
+
+// Or...
+// add :: a -> (a -> a)
+const add = x => y => x + y
+```
+
+--
+
+```
+add(1) // returns: function(y) => { return x + y }
+add(1)(2) // returns: 3
+```
+
+--
+
+```
+// addOne :: Number -> Number
+const addOne = add(1)
+// addTen :: Number -> Number
+const addTen = add(10)
+
+addOne(2) // returns: 3
+addTen(2) // returns: 12
+```
+
+---
+
+### Currying
+
+* `curry` (for `n` arguments) is included in `lodash` and `ramda`
+
+--
+
+* Order of arguments is important - the data should come last so we can "pre-fill" the function <small>(see <a href='https://www.youtube.com/watch?v=m3svKOdZijA'>Hey Underscore, You're Doing It Wrong!</a>)</small>
+
+    Consider: `_.indexOf(array, search)` vs `_.indexOf(search, array)`
+
+  * Although we could use `_.curryRight`, better off using `lodash/fp` or `ramda` (all functions pre-curried)
+
+---
+
+### Why currying?
+
+--
+
+* Allows us to easily make new domain functions from generic ones
+
+```
+const isGmailAddress = R.test(new RegExp('@gmail.com$'))
+isGmailAddress('test@gmail.com') // returns: true
+isGmailAddress('test@hotmail.com') // returns: false
+```
+
+--
+
+* Helps avoid the overhead of passing arguments around all the time
+
+
+--
 
 
     </textarea>
