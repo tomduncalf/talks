@@ -143,45 +143,45 @@ class: center, middle
 
 ### Hindley-Milner type signatures
 
-```javascript
+```
 // stringLength :: String -> Number
-function stringLength(input) {
+const stringLength = input => {
     return stringLength.length
 }
 ```
 
 --
 
-```javascript
+```
 // splitWords :: String -> [String]
-function splitWords(input) {
+const splitWords = input => {
     return input.split(' ')
 }
 ```
 
 --
 
-```javascript
+```
 // splitByCharacter :: String -> String -> [String]
-function splitByCharacter(input, char) {
+const splitByCharacter = (input, char) => {
     return input.split(char)
 }
 ```
 
 --
 
-```javascript
+```
 // splitAndTransformWords :: String -> (String -> String) -> [String]
-function splitAndTransformWords(input, transformFn) {
+const splitAndTransformWords = (input, transformFn) => {
     return s.split(' ').map(word => transformFn(word))
 }
 ```
 
 --
 
-```javascript
+```
 // transformArray :: [a] -> (a -> b) -> [b]
-function transformArray(inputArray, transformFn) {
+const transformArray = (inputArray, transformFn) => {
     return inputArray.map(el => transformFn(el))
 }
 ```
@@ -198,18 +198,35 @@ function transformArray(inputArray, transformFn) {
 * They can be passed around, stored in arrays, etc.
 * They are only called when invoked with `()`
 
-```javascript
-var hi = function(name){
-  return "Hi " + name;
-};
+--
 
+```
+// hi :: String -> String
+const hi = name => {
+    return "Hi " + name
+}
+```
+
+--
+
+```
 // This:
-var greeting = function(name) {
-  return hi(name);
-};
+// greet :: String -> String
+const greet = name => {
+  return hi(name)
+}
 
+// or this:
+// greet :: String -> String
+const greet = name => hi(name)
+```
+
+--
+
+```
 // ...is the same as:
-var greeting = hi;
+// greet :: String -> String
+const greet = hi
 ```
 
 * Wrapping `function` is not needed
@@ -218,57 +235,42 @@ var greeting = hi;
 
 ### First class functions
 
-```javascript
+```
 // This:
-var getServerStuff = function(callback){
-  return ajaxCall(function(json){
-    return callback(json);
-  });
-};
+// transformArray :: [a] -> (a -> b) -> [b]
+const transformArray = (inputArray, transformFn) => {
+    return inputArray.map(el => transformFn(el))
+}
+```
 
+--
+
+```
 // ...is the same as:
-var getServerStuff = ajaxCall;
+// transformArray :: [a] -> (a -> b) -> [b]
+const transformArray = (inputArray, transformFn) => {
+    return inputArray.map(transformFn)
+}
+
+// or:
+// transformArray :: [a] -> (a -> b) -> [b]
+const transformArray = (inputArray, transformFn) => inputArray.map(transformFn)
 ```
 
----
+--
 
-### First class functions
-
-```javascript
-
-
-  return ajaxCall(function(json){
-    return callback(json);
-  });
 ```
-
----
-
-### First class functions
-
-```javascript
-
-  // This:
-  return ajaxCall(function(json){
-    return callback(json);
-  });
-
-  // ...is the same as
-  return ajaxCall(callback)
-```
-
----
-
-### First class functions
-
-```javascript
 // This:
-var getServerStuff = function(callback){
-  ajaxCall(callback);
-};
+transformArray(['one', 'two', 'three'], x => x.length)
+```
 
+--
+
+```
 // ...is the same as:
-var getServerStuff = ajaxCall;
+// length :: a -> Number
+const length = x => x.length
+transformArray(['one', 'two', 'three'], length)
 ```
 
 ---
@@ -276,34 +278,33 @@ var getServerStuff = ajaxCall;
 ### First class functions
 
 * Less code, more readable
-* Easier to change function arguments - no need to update in multiple places
+* Easier to change function arguments - no need to update everywhere
 * Reduces the need to name arguments which allows us to write more generic code - common theme in FP
 
-```javascript
-// specific to our current blog
-var validArticles = function(articles) {
-  return articles.filter(function(article){
-    return article !== null && article !== undefined;
-  });
-};
+--
 
-// vastly more relevant for future projects
-var compact = function(xs) {
-  return xs.filter(function(x) {
-    return x !== null && x !== undefined;
-  });
-};
+```
+// Specific to our current domain:
+const validArticles = articles => {
+  return articles.filter(article => article !== null && article !== undefined)
+}
+
+// Generic and reusable:
+const compact = xs => {
+  return xs.filter(x !== null && x !== undefined)
+}
 ```
 
 ---
 
-### Hindley-Milner type signatures
 
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
     </script>
     <script>
-      var slideshow = remark.create();
+      var slideshow = remark.create({
+        highlightLanguage: 'javascript'
+      });
     </script>
   </body>
 </html>
