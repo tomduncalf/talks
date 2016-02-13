@@ -14,6 +14,8 @@
         font-weight: normal;
       }
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+      .remark-slide-number { display: none; }
     </style>
   </head>
   <body>
@@ -82,14 +84,15 @@ class: center, middle
 <center><img src='function.gif' height='30%'></center>
 * No dependence on factors external to the input
 
---
-* "Side effects are a primary cause of incorrect behaviour"
-
 ---
 
 ### Pure functions
 
-* Side effect: "anything that occurs in our computation besides the calculation of a result":
+* Side effect: "anything that occurs in our computation besides the calculation of a result"
+* "Side effects are a primary cause of incorrect behaviour"
+--
+
+* Examples include:
   * changing the file system
   * inserting a record into a database
   * making an http call
@@ -124,6 +127,64 @@ class: center, middle
 --
 
   * <b>Parallelisable</b>: do not need access to shared memory, no race conditions
+
+---
+
+### Hindley-Milner type signatures
+
+--
+
+* Specifies what types of inputs a function takes and what type it returns
+
+--
+* JS has no type checking but useful for documentation
+
+---
+
+### Hindley-Milner type signatures
+
+```javascript
+// stringLength :: String -> Number
+function stringLength(input) {
+    return stringLength.length
+}
+```
+
+--
+
+```javascript
+// splitWords :: String -> [String]
+function splitWords(input) {
+    return input.split(' ')
+}
+```
+
+--
+
+```javascript
+// splitByCharacter :: String -> String -> [String]
+function splitByCharacter(input, char) {
+    return input.split(char)
+}
+```
+
+--
+
+```javascript
+// splitAndTransformWords :: String -> (String -> String) -> [String]
+function splitAndTransformWords(input, transformFn) {
+    return s.split(' ').map(word => transformFn(word))
+}
+```
+
+--
+
+```javascript
+// transformArray :: [a] -> (a -> b) -> [b]
+function transformArray(inputArray, transformFn) {
+    return inputArray.map(el => transformFn(el))
+}
+```
 
 ---
 
