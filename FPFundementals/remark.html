@@ -37,6 +37,7 @@ class: center, middle
 * The basic concepts are actually quite simple (and useful)
 * Don't have to use a pure FP language - examples in Javascript
 * I am not an expert :)
+* Toolkit which makes writing functional programs good
 
 ---
 
@@ -367,6 +368,7 @@ addTen(2) // returns: 12
 * Allows us to easily make new domain functions from generic ones
 
 ```
+// isGmailAddress :: String -> Boolean
 const isGmailAddress = R.test(new RegExp('@gmail.com$'))
 isGmailAddress('test@gmail.com') // returns: true
 isGmailAddress('test@hotmail.com') // returns: false
@@ -376,8 +378,127 @@ isGmailAddress('test@hotmail.com') // returns: false
 
 * Helps avoid the overhead of passing arguments around all the time
 
+```
+// sendEmail :: Object -> String -> String -> String -> Boolean
+const sendEmail = (mailService, address, subject, body) => R.curry(...)
+
+// Repetitive:
+sendEmail(myMailService, adminEmail, errorSubject, 'Error 123 occured')
+sendEmail(myMailService, adminEmail, errorSubject, 'Error 456 occured')
+```
+--
+
+```
+// Returns a new function, waiting for the body argument before invoking sendEmail
+// sendErrorEmail :: String -> Boolean
+const emailError = sendEmail(myMailService, adminEmail, errorSubject)
+
+// Better!
+emailError('Error 123 occured')
+```
+---
+
+### Why currying?
+
+* Can transform any function that works with single elements into one that works on arrays using curried `map`
 
 --
+
+```
+// map :: (a -> b) -> [a] -> [b]
+const map = R.curry(fn, array => array.map(fn)) // or just R.map...
+```
+--
+
+````
+const strings = ['apple', 'banana', 'raspberry']
+
+// isApple :: String -> Boolean
+const isApple = input => input === 'apple' // or R.equals('apple')
+
+// areApples :: [String] -> [Boolean]
+const areApples = map(isApple)
+
+// All equivalent: return [true, false, false]
+areApples(strings)
+map(isApple)(strings)
+strings.map(string => isApple(string))
+```
+
+--
+
+* Benefits are less obvious with ES6 syntax than ES5, but currying becomes powerful when combined with other functional tools
+
+```
+strings.map(function(string) {
+  return lengthGt5(string)
+})
+```
+
+---
+
+### How is currying pure?
+
+* Each single argument of the function returns a new function expecting the remaining arguments
+--
+
+* Always returns the same function for the same input argument, so still pure: 1 input maps to exactly 1 ouptut
+
+<center><img src='function.gif' height='30%'></center>
+--
+
+* Allowing more than one argument at a time can be seen as a convenience
+
+```
+doSomething(1)(2)(3) === doSomething(1, 2, 3)
+```
+
+---
+
+### Composition
+
+--
+
+* Composition starts to demonstrate the power of working with pure, first class, curried functions
+
+--
+
+```
+// compose :: (b -> c) -> (a -> b) -> (a -> c)
+const compose = (f, g) => {
+  return x => f(g(x))
+}
+```
+
+* `f` and `g` are functions, `x` is the value being piped through them
+
+--
+
+```
+// head :: [a] -> a
+const head = x => x[0]
+// reverse :: [a] -> [a]
+const reverse = x => x.reverse()
+
+// last :: [a] -> a
+const last = compose(head, reverse) // equivalent to: x => head(reverse(x))
+
+last([1, 2, 3]) // returns: 3
+```
+
+* Data flows from right to left (first call `reverse`, then `head`)
+
+--
+
+* `ramda` and `lodash` provide generic `compose` for `n` functions (`R.compose`, `_.flowRight`) (and `R.pipe` or `_.flow` for left to right)
+
+---
+
+### Functors
+
+--
+
+* Composition is great but we have no way to handle errors or side effects
 
 
     </textarea>
