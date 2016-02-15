@@ -599,6 +599,7 @@ const avgBigWordLength = input =>
 
 With functions:
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength = input =>
   log(average(R.filter(R.lt(3), R.map(R.length, R.split(' ', input)))))
 ```
@@ -608,6 +609,7 @@ const avgBigWordLength = input =>
 With composition (and curried functions):
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
@@ -625,12 +627,13 @@ const avgBigWordLength = input =>
 With composition (and curried functions):
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   `R.compose`(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ```
-avgBigWordLength('Hello world how are you?')
+avgBigWordLength('Hello world how are you?')     // input is String
 ```
 
 ---
@@ -646,13 +649,14 @@ const avgBigWordLength = input =>
 With composition (and curried functions):
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), `R.split(' ')`)
 ```
 
 
 ```
-avgBigWordLength('Hello world how are you?')
+avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 ```
 
@@ -669,12 +673,13 @@ const avgBigWordLength = input =>
 With composition (and curried functions):
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   R.compose(log, average, R.filter(R.lt(3)), `R.map(R.length)`, R.split(' '))
 ```
 
 ```
-avgBigWordLength('Hello world how are you?')
+avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 // map(length):   [5, 5, 3, 3, 4]                           [Number]
 ```
@@ -692,12 +697,13 @@ const avgBigWordLength = input =>
 With composition (and curried functions):
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   R.compose(log, average, `R.filter(R.lt(3))`, R.map(R.length), R.split(' '))
 ```
 
 ```
-avgBigWordLength('Hello world how are you?')
+avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 // map(length):   [5, 5, 3, 3, 4]                           [Number]
 // filter(lt(3)): [5, 5]                                    [Number]
@@ -716,12 +722,13 @@ const avgBigWordLength = input =>
 With composition (and curried functions):
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   R.compose(log, `average`, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ```
-avgBigWordLength('Hello world how are you?')
+avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 // map(length):   [5, 5, 3, 3, 4]                           [Number]
 // filter(lt(3)): [5, 5]                                    [Number]
@@ -740,12 +747,13 @@ const avgBigWordLength = input =>
 With composition (and curried functions):
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   R.compose(`log`, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ```
-avgBigWordLength('Hello world how are you?')
+avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 // map(length):   [5, 5, 3, 3, 4]                           [Number]
 // filter(lt(3)): [5, 5]                                    [Number]
@@ -756,6 +764,10 @@ avgBigWordLength('Hello world how are you?')
 --
 
 * "Pointfree" style: doesn't mention the data we are operating on
+
+--
+
+* Type can change multiple times
 
 --
 
@@ -775,6 +787,7 @@ avgBigWordLength('Hello world how are you?')
 * We can extract any group of functions into their own composition:
 
 ```
+// avgBigWordLength :: String -> Number
 const avgBigWordLength =
   R.compose(log, average, `R.filter(R.lt(3)), R.map(R.length)`, R.split(' '))
 ```
@@ -788,16 +801,51 @@ const avgBigWordLength = R.compose(log, average, `lengthsLt3`, R.split(' '))
 
 --
 
-* Refactoring with mathematical rules backing it up!
+* Can refactor with mathematical rules to back it up!
 
+---
+
+### Composition
+
+* But how do we handle potential errors?
+
+--
+
+```
+const address1 = { street: 'Test Street', postcode: 'A1 1AA' }
+const address2 = { street: 'Test Street' }
+
+// R.prop :: b -> {b: a} -> a | Undefined
+R.prop('postcode', address1) // returns: 'A1 1AA'
+R.prop('postcode', address2) // returns: undefined
+```
+
+--
+
+```
+// postcodeLength :: Object -> Number | ???
+const postcodeLength = R.compose(R.length, R.replace(/ /, ''), R.prop('postcode'))
+```
+
+--
+
+```
+postcodeLength(address1) // returns: 5
+postcodeLength(address2) // Exception: Cannot read property 'replace' of undefined
+```
+
+--
+
+* We don't want exceptions in our code
+* Could wrap `replace` in a function with a null test... but we don't want to do this all the time
+--
+
+* And what about handling side effects?!
 
 ---
 
 ### Functors
 
---
-
-* Composition is great but we have no way to handle errors or side effects
 
 
     </textarea>
