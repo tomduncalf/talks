@@ -597,13 +597,19 @@ const avgBigWordLength = input =>
   log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 ```
 
+With functions:
+```
+const avgBigWordLength = input =>
+  log(average(R.filter(R.lt(3), R.map(R.length, R.split(' ', input)))))
+```
+
 --
 
 With composition (and curried functions):
 
 ```
 const avgBigWordLength =
-  R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' ')))
+  R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ---
@@ -620,7 +626,7 @@ With composition (and curried functions):
 
 ```
 const avgBigWordLength =
-  `R.compose`(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' ')))
+  `R.compose`(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ```
@@ -641,13 +647,13 @@ With composition (and curried functions):
 
 ```
 const avgBigWordLength =
-  R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), `R.split(' ')`))
+  R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), `R.split(' ')`)
 ```
 
 
 ```
 avgBigWordLength('Hello world how are you?')
-// split:         ['hello', 'world', 'how', 'are', 'you?']
+// split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 ```
 
 ---
@@ -664,13 +670,13 @@ With composition (and curried functions):
 
 ```
 const avgBigWordLength =
-  R.compose(log, average, R.filter(R.lt(3)), `R.map(R.length)`, R.split(' ')))
+  R.compose(log, average, R.filter(R.lt(3)), `R.map(R.length)`, R.split(' '))
 ```
 
 ```
 avgBigWordLength('Hello world how are you?')
-// split:         ['hello', 'world', 'how', 'are', 'you?']
-// map(length):   [5, 5, 3, 3, 4]
+// split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
+// map(length):   [5, 5, 3, 3, 4]                           [Number]
 ```
 
 ---
@@ -687,14 +693,14 @@ With composition (and curried functions):
 
 ```
 const avgBigWordLength =
-  R.compose(log, average, `R.filter(R.lt(3))`, R.map(R.length), R.split(' ')))
+  R.compose(log, average, `R.filter(R.lt(3))`, R.map(R.length), R.split(' '))
 ```
 
 ```
 avgBigWordLength('Hello world how are you?')
-// split:         ['hello', 'world', 'how', 'are', 'you?']
-// map(length):   [5, 5, 3, 3, 4]
-// filter(lt(3)): [5, 5]
+// split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
+// map(length):   [5, 5, 3, 3, 4]                           [Number]
+// filter(lt(3)): [5, 5]                                    [Number]
 ```
 
 ---
@@ -711,15 +717,15 @@ With composition (and curried functions):
 
 ```
 const avgBigWordLength =
-  R.compose(log, `average`, R.filter(R.lt(3)), R.map(R.length), R.split(' ')))
+  R.compose(log, `average`, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ```
 avgBigWordLength('Hello world how are you?')
-// split:         ['hello', 'world', 'how', 'are', 'you?']
-// map(length):   [5, 5, 3, 3, 4]
-// filter(lt(3)): [5, 5]
-// average:       5
+// split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
+// map(length):   [5, 5, 3, 3, 4]                           [Number]
+// filter(lt(3)): [5, 5]                                    [Number]
+// average:       5                                          Number
 ```
 ---
 
@@ -735,18 +741,56 @@ With composition (and curried functions):
 
 ```
 const avgBigWordLength =
-  R.compose(`log`, average, R.filter(R.lt(3)), R.map(R.length), R.split(' ')))
+  R.compose(`log`, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
-
 
 ```
 avgBigWordLength('Hello world how are you?')
-// split:         ['hello', 'world', 'how', 'are', 'you?']
-// map(length):   [5, 5, 3, 3, 4]
-// filter(lt(3)): [5, 5]
-// average:       5
-// log:           5
+// split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
+// map(length):   [5, 5, 3, 3, 4]                           [Number]
+// filter(lt(3)): [5, 5]                                    [Number]
+// average:       5                                          Number
+// log:           5                                          Number
 ```
+
+--
+
+* "Pointfree" style: doesn't mention the data we are operating on
+
+--
+
+* More readable, more compact, clear flow of data along "pipeline", no placeholder variables
+
+---
+
+### Composition
+
+* Composition of pure functions mirrors mathematical function composition: <em>(g ∘ f)(x) = g(f(x))</em> (generalized in category theory)
+
+--
+
+* Composition is associative: <em>f ∘ (g ∘ h) = (f ∘ g) ∘ h</em>
+
+--
+* We can extract any group of functions into their own composition:
+
+```
+const avgBigWordLength =
+  R.compose(log, average, `R.filter(R.lt(3)), R.map(R.length)`, R.split(' '))
+```
+
+--
+
+```
+const lengthsLt3 = R.compose(`R.filter(R.lt(3)), R.map(R.length)`)
+const avgBigWordLength = R.compose(log, average, `lengthsLt3`, R.split(' '))
+```
+
+--
+
+* Refactoring with mathematical rules backing it up!
+
+
 ---
 
 ### Functors
