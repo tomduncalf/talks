@@ -8,5 +8,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "data.either": "1.3.0",
+    "data.task": "3.0.0",
+    "node-fetch": "1.3.3",
+    "ramda": "0.19.1",
+    "ramda-fantasy": "0.4.1",
+    "ramda-maybe": "0.18.0"
+  }
 }

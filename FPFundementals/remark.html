@@ -799,10 +799,6 @@ const lengthsLt3 = R.compose(`R.filter(R.lt(3)), R.map(R.length)`)
 const avgBigWordLength = R.compose(log, average, `lengthsLt3`, R.split(' '))
 ```
 
---
-
-* Can refactor with mathematical rules to back it up!
-
 ---
 
 ### Composition
@@ -846,6 +842,190 @@ postcodeLength(address2) // Exception: Cannot read property 'replace' of undefin
 
 ### Functors
 
+--
+
+```
+const Container = function(x) {
+  this.__value = x // treat this as private
+}
+
+// of :: a -> Container a
+// Sometimes also called pure, point, unit or return
+Container.of = x => new Container(x)
+```
+--
+
+```
+Container.of(4) // returns: {"__value": 4}, but let's call this Container(4)
+Container.of('hello world') // returns: Container('hello world')
+Container.of(Container.of({ id: 1 })) // returns: Container(Container({ id: 1 }))
+```
+--
+
+* Add a `map` function to allow us to apply functions to the value inside
+
+```
+// map :: (a -> b) -> Container a -> Container b
+Container.prototype.map = function(fn) {
+  return Container.of(fn(this.__value))
+}
+```
+
+--
+
+```
+const four = Container.of(4)
+four.map(x => x + 2) // returns: Container(6)
+
+const hello = Container.of({ message: 'hello world' })
+hello.map(R.prop('message')).map(R.length).map(R.concat('length is: ')) // returns: Container('length is: 11')
+```
+
+---
+
+### Functors
+
+* "A functor is a type that implements `map` and obeys some laws"
+
+* Why would we want to do contain a value and run `map` to get to it?
+--
+
+
+* Abstraction of function application - with `map`, we ask the container to run the function for us
+* Allows to provide useful behaviour while mapping
+---
+
+### Maybe
+
+```
+const Maybe = function(x) {
+  this.__value = x
+}
+
+// of :: a -> Maybe a
+Maybe.of = x => new Maybe(x)
+
+// map :: (a -> b) -> Maybe b
+Maybe.prototype.map = function(fn) {
+  return this.isNothing() ? Maybe.of(null) : Maybe.of(fn(this.__value));
+}
+
+// isNothing :: Boolean
+Maybe.prototype.isNothing = function() {
+  return (this.__value === null || this.__value === undefined)
+}
+```
+
+--
+
+```
+Maybe.of('hello world') // returns: Maybe('hello world')
+Maybe.of('hello world').map(R.match(/hello/)).map(R.length) // returns: Maybe(1)
+```
+
+--
+
+```
+Container.of(null).map(R.match(/hello/)).map(R.length)
+  // Exception: TypeError: Cannot read property 'match' of null
+```
+
+--
+
+```
+Maybe.of(null).map(R.match(/hello/)).map(R.length) // returns: Maybe(null)
+```
+
+---
+
+### Maybe
+
+* `Maybe` takes care of null checking for us
+* `Maybe` is typically used as the return type of functions that may fail to return a result
+
+```
+// safeHead :: [a] -> Maybe(a)
+const safeHead = xs => Maybe.of(xs[0])
+
+safeHead([1, 2, 3]) // returns: Maybe(1)
+safeHead([]) // returns: Maybe(null)
+```
+
+* Gives safety by forcing calling code to handle the `null` case - we can only get at the value by calling `map`
+
+--
+
+* `map` allows us to compose functors
+
+```
+// headLength :: [a] -> Maybe String
+const headLength = R.pipe(safeHead, R.map(R.length), R.map(R.concat('Length: ')))
+
+headLength(['one', 'two', 'three']) // returns: Maybe('Length: 3')
+headLength([]) // returns: Maybe(null)
+```
+--
+
+* The function being called doesn't have to know about functors - map "lifts" the function
+
+---
+
+### Maybe
+
+* We can get the value out of `Maybe` using the `maybe` function
+
+```
+//  maybe :: b -> (a -> b) -> Maybe a -> b
+const maybe = curry((defaultValue, transformFn, m) =>
+  m.isNothing() ? defaultValue : transformFn(m.__value)
+
+// getResult :: Maybe a -> a | String
+const getResult = maybe('No item found', x => x)
+
+getResult(safeHead([1, 2, 3])) // returns: 1
+getResult(safeHead([])) // returns: 'No item found'
+```
+
+--
+
+* Or using `getOrElse`
+
+```
+Maybe.prototype.getOrElse = function(defaultValue) {
+  return this.isNothing() ? defaultValue : this.__value
+}
+
+safeHead([1, 2, 3]).getOrElse('No item found') // returns: 1
+safeHead([]).getOrElse('No item found') // returns: 'No item found'
+```
+
+--
+
+* Real implementation of `Maybe` is split into two types rather than doing a `null` check: `Maybe.Just(x)` and `Maybe.Nothing`
+
+```
+const safeHead = xs => xs.length ? Maybe.Just(xs[0]) : Maybe.Nothing()
+```
+
+---
+
+---
+
+### IO
+
+---
+
+### Task
+
+---
+
+### Monads
+* Promises
+* RxJS
+
+---
+
+### Summary
 
 
     </textarea>
