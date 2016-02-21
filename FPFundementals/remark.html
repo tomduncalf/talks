@@ -1009,13 +1009,133 @@ const safeHead = xs => xs.length ? Maybe.Just(xs[0]) : Maybe.Nothing()
 
 ---
 
+### IO
+
+--
+
+* We can make a function which has a side effect pure by wrapping it in another function:
+
+```
+// getFromStorage :: String -> (_ -> String)
+const getFromStorage = function(key) {
+  return function() {
+    return window.localStorage[key]
+  }
+}
+```
+
+* We always get the same output for the same input (a function that gets that key from localStorage)
+
+* But how can we make this useful for managing side effects?
+
 ---
 
 ### IO
 
+```
+const IO = function(fn) {
+  // Same as __value, but renamed
+  this.unsafePerformIO = fn
+}
+
+IO.of = function(x) {
+  return new IO(function() {
+    return x
+  })
+}
+
+IO.prototype.map = function(fn) {
+  return new IO(R.compose(fn, this.unsafePerformIO))
+}
+```
+
+--
+
+```
+// url :: IO String
+const url = IO.of(window.location.href) // returns: {unsafePerformIO: [Function]}
+
+url.unsafePerformIO() // returns: http://www.google.com
+```
+
+--
+
+```
+const url = new function() {
+  this.unsafePerformIO = function() {
+    return window.location.href
+  }
+}
+```
+
+---
+
+### IO
+
+* We can use `map` to build up a composed chain of actions, ready to be performed by calling `unsafePerformIO`
+
+```
+// url :: IO String
+const url = IO.of(window.location.href)
+
+// urlEmail :: IO String
+const urlEmail = url.map(R.match(/[a-z]*\.com/)).map(R.nth(0)).map(R.concat('@'))
+
+urlEmail.unsafePerformIO() // returns: '@google.com'
+```
+
+--
+
+* Internally, we have built up something like:
+
+```
+const urlEmail = new function() {
+  this.unsafePerformIO = R.compose(
+    R.concat('@'),
+    R.nth(0),
+    R.match(/[a-z]*\.com/),
+    function() { return window.location.href }
+  )
+}
+```
+
+--
+
+* IO enables us to control side effects by pushing responsibility for running them to calling code (and indicates side effects in the type signature)
 ---
 
 ### Task
+
+* `Task` is designed to help us deal with asynchronous code
+
+--
+
+```
+// Using Data.Task from folktale
+
+// readFile :: String -> Task Error String
+const readFile = filename => {
+  return new Task(function(reject, result) {
+    fs.readFile(filename, 'utf-8', (err, data) => {
+      err ? reject(err) : result(data)
+    })
+  })
+}
+```
+
+```
+// myFileLength :: Task Error Number
+const linesInMyFile = readFile('my_file.txt').map(R.split('\n')).map(R.length)
+
+linesInMyFile.fork(
+  error => console.error(error),
+  result => console.log('There are ' + result + ' lines in my file')
+)
+```
+
+--
+
+* Looks familiar? `Promises` are basically `Tasks`, with `then` instead of `map`
 
 ---
 

@@ -35,3 +35,20 @@ Right.prototype.map = function(fn) {
 * Similar to Maybe but Left branch can carry an error message (or whatever)
 * Function being called don't need to know about functors - we use `map` to "lift" the function
   * c.f. array map
+
+3
+
+
+
+
+
+--
+
+* Can rewrite using `compose`:
+
+```
+// domainToEmail :: String -> String
+const domainToEmail = R.compose(R.concat('@'), R.nth(0), R.match(/[a-z]*\.com/))
+
+const urlEmail = url.map(domainToEmail)
+```
