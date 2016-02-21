@@ -43,3 +43,14 @@ doSomething(1)(2)(3) === doSomething(1, 2, 3)
 ```
 
 ---
+
+
+
+--
+
+* Real implementation of `Maybe` is split into two types rather than doing a `null` check: `Maybe.Just(x)` and `Maybe.Nothing`
+
+
+```
+const safeHead = xs => xs.length ? Maybe.Just(xs[0]) : Maybe.Nothing()
+```
