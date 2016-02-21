@@ -1154,8 +1154,387 @@ const safeHead = safeProp(0)
 
 // firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
 const firstAddressStreet = R.compose(
-  map(map(safeProp('street'))), // need to double map because we now have Maybe(Maybe)!
-  map(safeHead), // need to map to work with the Maybe from safeProp
+  R.map(R.map(safeProp('street'))),
+  R.map(safeHead),
+  safeProp('addresses')
+)
+```
+
+--
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+```
+
+---
+
+### Monads
+
+* Nested functors lead to uncomfortable code:
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+const safeProp = R.curry((key, obj) => Maybe.of(obj[key]))
+
+// safeHead :: [a] -> Maybe a
+const safeHead = safeProp(0)
+
+// firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
+const firstAddressStreet = R.compose(
+  R.map(R.map(safeProp('street'))),
+  R.map(safeHead),
+  `safeProp('addresses')`
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+```
+
+---
+
+### Monads
+
+* Nested functors lead to uncomfortable code:
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+const safeProp = R.curry((key, obj) => Maybe.of(obj[key]))
+
+// safeHead :: [a] -> Maybe a
+const safeHead = safeProp(0)
+
+// firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
+const firstAddressStreet = R.compose(
+  R.map(R.map(safeProp('street'))),
+  `R.map(safeHead)`,
+  safeProp('addresses')
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+// map(safeHead):      Maybe(Maybe({ street: 'Test St.' }))  Maybe(Maybe Object)
+```
+
+---
+
+### Monads
+
+* Nested functors lead to uncomfortable code:
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+const safeProp = R.curry((key, obj) => Maybe.of(obj[key]))
+
+// safeHead :: [a] -> Maybe a
+const safeHead = safeProp(0)
+
+// firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
+const firstAddressStreet = R.compose(
+  `R.map(R.map(safeProp('street')))`,
+  R.map(safeHead)`,
+  safeProp('addresses')
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+// map(safeHead):      Maybe(Maybe({ street: 'Test St.' }))  Maybe(Maybe Object)
+// map(map(safeProp)): Maybe(Maybe(Maybe('Test St.')))       M(M(Maybe String)))
+```
+
+---
+
+### Monads
+
+* `join` removes a 'layer' when we have two nested functors of the same type
+
+```
+Maybe.prototype.join = function() {
+  return this.isNothing() ? Maybe.of(null) : this.__value
+}
+
+IO.prototype.join = function() {
+  return this.unsafePerformIO()
+}
+```
+
+```
+const mm = Maybe.of(Maybe.of('Hello world')) // Maybe(Maybe('Hello world'))
+mm.join()                                    // Maybe('Hello world')
+
+const ioio = IO.of(IO.of(window.location.href)) // IO(IO('http://google.com'))
+ioio.join                                       // IO('http://google.com')
+```
+
+--
+
+* "Any functor which defines a `join` method, has an `of` method, and obeys a few laws is a monad"
+
+---
+
+### Monads
+
+```
+// firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
+const firstAddressStreet = R.compose(
+  R.map(R.map(safeProp('street'))),
+  R.map(safeHead),
+  safeProp('addresses')
+)
+```
+--
+
+```
+//  join :: Monad m => m (m a) -> m a
+const join = function(nestedMonad) {
+  return nestedMonad.join()
+}
+```
+
+--
+
+```
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  join,
+  R.map(safeProp('street')),
+  join,
+  R.map(safeHead),
+  safeProp('addresses')
+)
+```
+
+---
+
+### Monads
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  join,
+  R.map(safeProp('street')),
+  join,
+  R.map(safeHead),
+  safeProp('addresses')
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+```
+
+---
+
+### Monads
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  join,
+  R.map(safeProp('street')),
+  join,
+  R.map(safeHead),
+  `safeProp('addresses')`
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+```
+
+---
+
+### Monads
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  join,
+  R.map(safeProp('street')),
+  join,
+  `R.map(safeHead)`,
+  safeProp('addresses')
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+// map(safeHead):      Maybe(Maybe({ street: 'Test St.' }))  Maybe(Maybe Object)
+```
+
+---
+
+### Monads
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  join,
+  R.map(safeProp('street')),
+  `join`,
+  R.map(safeHead),
+  safeProp('addresses')
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+// map(safeHead):      Maybe(Maybe({ street: 'Test St.' }))  Maybe(Maybe Object)
+// join:               Maybe({ street: 'Test St.' })         Maybe Object
+```
+
+---
+
+### Monads
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  join,
+  `R.map(safeProp('street'))`,
+  join,
+  R.map(safeHead),
+  safeProp('addresses')
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+// map(safeHead):      Maybe(Maybe({ street: 'Test St.' }))  Maybe(Maybe Object)
+// join:               Maybe({ street: 'Test St.' })         Maybe Object
+// map(safeProp):      Maybe(Maybe('Test St.'))              Maybe(Maybe String))
+```
+
+
+---
+
+### Monads
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  `join`,
+  R.map(safeProp('street')),
+  join,
+  R.map(safeHead),
+  safeProp('addresses')
+)
+```
+
+```
+firstAddressStreet({
+  addresses: [{ street: 'Test St.'}]
+})
+
+// safeProp:           Maybe([{ street: 'Test St.'}])        Maybe [Object]
+// map(safeHead):      Maybe(Maybe({ street: 'Test St.' }))  Maybe(Maybe Object)
+// join:               Maybe({ street: 'Test St.' })         Maybe Object
+// map(safeProp):      Maybe(Maybe('Test St.'))              Maybe(Maybe String))
+// join:               Maybe('Test St.')                     Maybe String
+```
+
+---
+
+### Monads
+
+* `map` followed by `join` is a common pattern - abstracted into a function called `chain` (also know as `flatMap`, `bind` or `>>=`)
+
+```
+//  chain :: Monad m => (a -> m b) -> m a -> m b
+const chain = R.curry((mapFn, monad) =>
+  return monad.map(mapFn).join() // or R.compose(R.join, R.map(mapFn))(monad)
+});
+```
+
+--
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  `join,`
+  `R.map`(safeProp('street')),
+  `join,`
+  `R.map`(safeHead),
+  safeProp('addresses')
+)
+```
+
+---
+
+### Monads
+
+* `map` followed by `join` is a common pattern - abstracted into a function called `chain` (also know as `flatMap`, `bind` or `>>=`)
+
+```
+//  chain :: Monad m => (a -> m b) -> m a -> m b
+const chain = R.curry((mapFn, monad) =>
+  return monad.map(mapFn).join() // or R.compose(R.join, R.map(mapFn))(monad)
+});
+```
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+// safeHead :: [a] -> Maybe a
+
+// firstAddressStreet :: Object -> Maybe String
+const firstAddressStreet = R.compose(
+  `chain`(safeProp('street')),
+  `chain`(safeHead),
   safeProp('addresses')
 )
 ```

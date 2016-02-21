@@ -74,9 +74,13 @@ const safeHead2 = safeProp(0)
 
 // firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
 const firstAddressStreet = R.compose(
-  map(map(safeProp('street'))), // need to double map because we now have Maybe(Maybe)!
-  map(safeHead2), // need to map to work with the Maybe from safeProp
+  R.map(R.map(safeProp('street'))), // need to double map because we now have Maybe(Maybe)!
+  R.map(safeHead2), // need to map to work with the Maybe from safeProp
   safeProp('addresses')
 )
 
-console.log(firstAddressStreet)
+console.log(firstAddressStreet({
+  addresses: [
+    { street: 'Test St.' }
+  ]
+}))
