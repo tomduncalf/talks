@@ -1140,8 +1140,25 @@ linesInMyFile.fork(
 ---
 
 ### Monads
-* Promises
-* RxJS
+
+--
+
+* Nested functors lead to uncomfortable code:
+
+```
+// safeProp :: Key -> {Key: a} -> Maybe a
+const safeProp = R.curry((key, obj) => Maybe.of(obj[key]))
+
+// safeHead :: [a] -> Maybe a
+const safeHead = safeProp(0)
+
+// firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
+const firstAddressStreet = R.compose(
+  map(map(safeProp('street'))), // need to double map because we now have Maybe(Maybe)!
+  map(safeHead), // need to map to work with the Maybe from safeProp
+  safeProp('addresses')
+)
+```
 
 ---
 

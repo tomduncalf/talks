@@ -64,3 +64,19 @@ Maybe.prototype.getOrElse = function(defaultValue) {
 const lengthOfHead = R.pipe(safeHead, R.map(R.length), R.map(R.concat('Length: ')))
 console.log(lengthOfHead(['one', 'two', 'three']))
 console.log(lengthOfHead([]))
+
+
+// safeProp :: Key -> {Key: a} -> Maybe a
+const safeProp = R.curry((key, obj) => Maybe.of(obj[key]))
+
+// safeHead :: [a] -> Maybe a
+const safeHead2 = safeProp(0)
+
+// firstAddressStreet :: Object -> Maybe(Maybe(Maybe String))
+const firstAddressStreet = R.compose(
+  map(map(safeProp('street'))), // need to double map because we now have Maybe(Maybe)!
+  map(safeHead2), // need to map to work with the Maybe from safeProp
+  safeProp('addresses')
+)
+
+console.log(firstAddressStreet)
