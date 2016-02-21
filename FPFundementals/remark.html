@@ -23,21 +23,9 @@
 
 class: center, middle
 
-# FP Fundamentals
-## Functors, monads and more
+# Functional Programming Fundementals
 <br>
 <center><small>Tom Duncalf | <a href='mailto:tom@tomduncalf.com'>tom@tomduncalf.com</a> | <a href='https://twitter.com/tomduncalf'>@tomduncalf</a></small></center>
-
----
-
-### Why?
-
-* A lot of interest in FP at the minute
-* Some of the fundamental concepts (functors, monads etc.) are sometimes made to seem very complicated
-* The basic concepts are actually quite simple (and useful)
-* Don't have to use a pure FP language - examples in Javascript
-* I am not an expert :)
-* Toolkit which makes writing functional programs good
 
 ---
 
@@ -54,12 +42,17 @@ class: center, middle
 ### Concepts we'll cover
 
 * Pure functions
+
+* Type signatures
+
 * First class functions
-* Hindley-Milner type signatures
+
 * Currying
+
 * Composition
-* Pointfree style
+
 * Functors
+
 * Monads
 
 ---
@@ -68,78 +61,100 @@ class: center, middle
 
 --
 
-* A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.
+* A pure function is a function that, given the same input(s), will always return the same output
 
----
+* No dependency on anything external to its arguments
 
-### Pure functions
-
-* <span style='opacity:0.3'>A pure function is a function that, </span>given the same input, will always return the same output <span style='opacity:0.3'>and does not have any observable side effect.</span>
-<center><img src='function.gif' height='30%'></center>
-
----
-
-### Pure functions
-
-* A pure function is a function that, given the same input, will always return the same output and does not have any observable side effect.
-<center><img src='function.gif' height='30%'></center>
-* No dependence on factors external to the input
-
----
-
-### Pure functions
-
-* Side effect: "anything that occurs in our computation besides the calculation of a result"
-* "Side effects are a primary cause of incorrect behaviour"
 --
 
-* Examples include:
-  * changing the file system
-  * inserting a record into a database
-  * making an http call
-  * printing to the screen / logging
-  * obtaining user input
-  * querying the DOM
-  * any interaction with the world outside of the function!
+```
+let minPasswordLength = 8
+
+// Not pure
+const isGoodPassword = function(password) {
+  return password.length > minPasswordLength
+}
+
+isGoodPassword('tom') // returns: false
+isGoodPassword('tomtomtom') // returns: true
+```
+
+--
+
+```
+// Pure
+const isGoodPassword = function(password, minLength) {
+  return password.length > minLength
+}
+
+isGoodPassword('tom', 8) // returns: false
+isGoodPassword('tomtomtom', 8) // returns: true
+```
 
 ---
 
 ### Pure functions
 
-* How can we program without side effects?
-  * We can't - we aim to control them and run them in a controlled manner
-  * more on this later...
+* No observable side effects
+
+--
+
+* <b>Side effect</b>: "any interaction with the world outside of our function"
+
+--
+
+  * making an HTTP call
+
+  * interacting with a database
+
+  * printing to the screen / logging
+
+  * changing the file system
+
+--
+
+* How can we program without side effects?!
+
+--
+
+* We can't - but FP aims to execute them in a controlled way
 
 ---
 
 ### Why pure functions?
 
+--
+
+* <b>Easy to reason about</b>: we know a pure function's dependencies, and that it won't change the outside world
+
+--
+
 * <b>Cacheable</b> (memoization): we know the same input will always give the same output
+
 --
 
-* <b>Portable</b>: a function's dependencies are explicit
---
+* <b>Testable</b>: we don't need to mock complex environmental dependencies
 
-* <b>Testable</b>: we don't need to mock complex dependencies, just assert outputs given inputs
---
-
-* <b>Referential transparency</b>: code can be substituted for its generated value
 --
 
 * <b>Parallelisable</b>: do not need access to shared memory, no race conditions
 
+--
+
+* Meets the mathematical definition of a function:
+
+<center><img src='function.gif' height='30%'></center>
 ---
 
-### Hindley-Milner type signatures
+### Type signatures
 
 --
 
-* Specifies what types of inputs a function takes and what type it returns
+* Specifies what types of inputs a function takes and what type it returns (String, Number, etc)
+
 --
 
-* JS has no type checking but useful for documentation
-* Can often understand what a function does just from name and type signature
-* Can be useful for searching for a function e.g. Ramda docs, Hoogle
+* JS has no type checking but useful to document and think about types
 
 ---
 
@@ -147,8 +162,8 @@ class: center, middle
 
 ```
 // stringLength :: String -> Number
-const stringLength = input => {
-    return stringLength.length
+const stringLength = function(inputString) {
+    return inputString.length
 }
 ```
 
@@ -156,8 +171,8 @@ const stringLength = input => {
 
 ```
 // splitWords :: String -> [String]
-const splitWords = input => {
-    return input.split(' ')
+const splitWords = function(inputString) {
+    return inputString.split(' ')
 }
 ```
 
@@ -165,8 +180,8 @@ const splitWords = input => {
 
 ```
 // splitByCharacter :: String -> String -> [String]
-const splitByCharacter = (input, char) => {
-    return input.split(char)
+const splitByCharacter = function(inputString, char) {
+    return inputString.split(char)
 }
 ```
 
@@ -174,8 +189,8 @@ const splitByCharacter = (input, char) => {
 
 ```
 // splitAndTransformWords :: String -> (String -> String) -> [String]
-const splitAndTransformWords = (input, transformFn) => {
-    return s.split(' ').map(word => transformFn(word))
+const splitAndTransformWords = function(inputString, transformFn) {
+    return inputString.split(' ').map(word => transformFn(word))
 }
 ```
 
@@ -183,7 +198,7 @@ const splitAndTransformWords = (input, transformFn) => {
 
 ```
 // transformArray :: [a] -> (a -> b) -> [b]
-const transformArray = (inputArray, transformFn) => {
+const transformArray = function(inputArray, transformFn) {
     return inputArray.map(el => transformFn(el))
 }
 ```
@@ -192,54 +207,21 @@ const transformArray = (inputArray, transformFn) => {
 
 ### First class functions
 
----
-
-### First class functions
+--
 
 * Functions are treated just like any other data type
-* They can be passed around, stored in variables, arrays, etc.
+
+* Functions be passed as arguments to other functions, returned from functions, stored in variables, arrays, etc.
+
 * They are only called when invoked with `()`
 
 --
 
 ```
-// hi :: String -> String
-const hi = name => {
-    return "Hi " + name
-}
-```
-
---
-
-```
-// This:
-// greet :: String -> String
-const greet = name => {
-  return hi(name)
-}
-
-// or this:
-// greet :: String -> String
-const greet = name => hi(name)
-```
-
---
-
-```
-// ...is the same as:
-// greet :: String -> String
-const greet = hi
-```
-
----
-
-### First class functions
-
-```
-// This:
-// transformArray :: [a] -> (a -> b) -> [b]
-const transformArray = (inputArray, transformFn) => {
-    return inputArray.map(el => transformFn(el))
+// This...
+// debug :: String -> String
+const debug = function(string) {
+  console.log(string)
 }
 ```
 
@@ -247,30 +229,23 @@ const transformArray = (inputArray, transformFn) => {
 
 ```
 // ...is the same as:
-// transformArray :: [a] -> (a -> b) -> [b]
-const transformArray = (inputArray, transformFn) => {
-    return inputArray.map(transformFn)
-}
-
-// or:
-// transformArray :: [a] -> (a -> b) -> [b]
-const transformArray = (inputArray, transformFn) => inputArray.map(transformFn)
+// debug :: String -> String
+const debug = console.log
 ```
 
 --
 
 ```
 // This:
-transformArray(['one', 'two', 'three'], x => x.length)
+const passwords = ['test', 'password123', 'hello']
+passwords.map(password => isGoodPassword(password)) // returns [false, true, false]
 ```
 
 --
 
 ```
 // ...is the same as:
-// length :: a -> Number
-const length = x => x.length
-transformArray(['one', 'two', 'three'], length)
+passwords.map(isGoodPassword) // returns [false, true, false]
 ```
 
 ---
@@ -278,58 +253,38 @@ transformArray(['one', 'two', 'three'], length)
 ### Why first class functions?
 
 * Less code, more readable
-* Easier to change function arguments - no need to update everywhere
-* Reduces the need to name arguments which allows us to write more generic code - common theme in FP
 
---
-
-```
-// Specific to our current domain:
-// validArticles :: [a] -> [a]
-const validArticles = articles => {
-  return articles.filter(article => article !== null && article !== undefined)
-}
-
-// Generic and reusable:
-// compact :: [a] -> [a]
-const compact = xs => {
-  return xs.filter(x !== null && x !== undefined)
-}
-```
+* Reduces the need to name things which allows us to write more generic code - a common theme in functional programming
 
 ---
 
-### Currying
+### Curried functions
 
 --
 
-* A curried function can be called with fewer arguments than it expects, and will return a function that takes the remaining arguments
+* A curried function can be called with fewer arguments than it expects
 
----
-
-### Currying
-
-* A curried function can be called with fewer arguments than it expects, and will return a partially applied function that takes the remaining arguments
+* If called with fewer arguments, will return a "partially applied" function that takes the remaining arguments
 
 --
 
 ```
-// add :: a -> (a -> a) - e.g. Number -> (Number -> Number)
-const add = (x) => {
-  return (y) => {
+// add :: Number -> (Number -> Number)
+const add = function(x) {
+  return function(y) {
     return x + y
   }
 }
+```
+--
 
-// Or...
-// add :: a -> (a -> a)
-const add = x => y => x + y
+```
+add(1) // returns: function(y) { return 1 + y }
 ```
 
 --
 
 ```
-add(1) // returns: function(y) => { return x + y }
 add(1)(2) // returns: 3
 ```
 
@@ -347,17 +302,42 @@ addTen(2) // returns: 12
 
 ---
 
-### Currying
+### Curried functions
+
+* Javascript functions are not curried by default
+
+--
 
 * `curry` (for `n` arguments) is included in `lodash` and `ramda`
 
 --
 
-* Order of arguments is important - the data should come last so we can "pre-fill" the function <small>(see <a href='https://www.youtube.com/watch?v=m3svKOdZijA'>Hey Underscore, You're Doing It Wrong!</a>)</small>
+```
+const R = require('ramda')
 
-    Consider: `_.indexOf(array, search)` vs `_.indexOf(search, array)`
+// add :: Number -> Number -> Number
+const add = R.curry(function(x, y) {
+  return x + y
+})
 
-  * Although we could use `_.curryRight`, better off using `lodash/fp` or `ramda` (all functions pre-curried)
+add(1) // returns: function(y) { return 1 + y }
+add(1)(2) // returns: 3
+add(1, 2) // returns: 3
+```
+
+--
+
+* All functions in `ramda` and `lodash/fp` are curried by default and the data argument comes last so we can "pre-fill" the function
+
+```
+// R.indexOf(search, inputArray) is a curried function: a -> [a] -> Number
+
+// indexOfAt :: String -> Number
+const indexOfAt = R.indexOf('@')
+indexOfAt('tom@tomduncalf.com') // returns: 3
+
+// We couldn't do this (as easily...) if it were R.indexOf(inputAarray, search)
+```
 
 ---
 
@@ -365,93 +345,22 @@ addTen(2) // returns: 12
 
 --
 
-* Allows us to easily make new domain functions from generic ones
+* Allows us to easily make new domain-specific functions from generic ones
 
 ```
+// R.test is a curried function: Regexp -> String -> Boolean
+R.test(/hello/, 'hello world') // returns: true
+
 // isGmailAddress :: String -> Boolean
 const isGmailAddress = R.test(new RegExp('@gmail.com$'))
+
 isGmailAddress('test@gmail.com') // returns: true
 isGmailAddress('test@hotmail.com') // returns: false
 ```
 
 --
 
-* Helps avoid the overhead of passing arguments around all the time
-
-```
-// sendEmail :: Object -> String -> String -> String -> Boolean
-const sendEmail = (mailService, address, subject, body) => R.curry(...)
-
-// Repetitive:
-sendEmail(myMailService, adminEmail, errorSubject, 'Error 123 occured')
-sendEmail(myMailService, adminEmail, errorSubject, 'Error 456 occured')
-```
---
-
-```
-// Returns a new function, waiting for the body argument before invoking sendEmail
-// sendErrorEmail :: String -> Boolean
-const emailError = sendEmail(myMailService, adminEmail, errorSubject)
-
-// Better!
-emailError('Error 123 occured')
-```
----
-
-### Why currying?
-
-* Can transform any function that works with single elements into one that works on arrays using curried `map`
-
---
-
-```
-// map :: (a -> b) -> [a] -> [b]
-const map = R.curry(fn, array => array.map(fn)) // or just R.map...
-```
---
-
-````
-const strings = ['apple', 'banana', 'raspberry']
-
-// isApple :: String -> Boolean
-const isApple = input => input === 'apple' // or R.equals('apple')
-
-// areApples :: [String] -> [Boolean]
-const areApples = map(isApple)
-
-// All equivalent: return [true, false, false]
-areApples(strings)
-map(isApple)(strings)
-strings.map(string => isApple(string))
-```
-
---
-
-* Benefits are less obvious with ES6 syntax than ES5, but currying becomes powerful when combined with other functional tools
-
-```
-strings.map(function(string) {
-  return lengthGt5(string)
-})
-```
-
----
-
-### How is currying pure?
-
-* Each single argument of the function returns a new function expecting the remaining arguments
---
-
-* Always returns the same function for the same input argument, so still pure: 1 input maps to exactly 1 ouptut
-
-<center><img src='function.gif' height='30%'></center>
---
-
-* Allowing more than one argument at a time can be seen as a convenience
-
-```
-doSomething(1)(2)(3) === doSomething(1, 2, 3)
-```
+* Currying becomes useful when combined with composition
 
 ---
 
@@ -465,44 +374,33 @@ doSomething(1)(2)(3) === doSomething(1, 2, 3)
 
 ```
 // compose :: (b -> c) -> (a -> b) -> (a -> c)
-const compose = (f, g) => {
-  return x => f(g(x))
+const compose = function(f, g) {
+  return function(x) {
+    return f(g(x))
+  }
 }
 ```
-
 * `f` and `g` are functions, `x` is the value being piped through them
+* Data flows from right to left
 
 --
 
 ```
-// head :: [a] -> a
-const head = x => x[0]
-// reverse :: [a] -> [a]
-const reverse = x => x.reverse()
+// doublePlusOne :: Number -> Number
+const doublePlusOne = compose(R.add(1), R.multiply(2))
+// same as R.add(1, R.multiply(2))
 
-// last :: [a] -> a
-const last = compose(head, reverse) // equivalent to: x => head(reverse(x))
-
-last([1, 2, 3]) // returns: 3
+doublePlusOne(3) // returns: 7
 ```
-
-* Data flows from right to left (first call `reverse`, then `head`)
-
---
-
-* `ramda` and `lodash` provide generic `compose` for `n` functions (`R.compose`, `_.flowRight` - and `R.pipe` or `_.flow` for left to right flow)
 
 ---
 
 ### Composition example
 
-* Split a sentence into words, filter out words < 3 chars, calculate average word length, log it
+* Split a sentence into words, filter out words < 3 chars, calculate average word length
 
 ```
 // average :: [Number] -> Number
-const average = numbers => R.sum(numbers) / numbers.length
-// log :: String -> Void
-const log = console.log
 ```
 
 --
@@ -510,12 +408,12 @@ const log = console.log
 Without composition:
 ```
 // avgBigWordLength :: String -> Number
-const avgBigWordLength = input => {
+const avgBigWordLength = function(input) {
   const words = input.split(' ')
   const wordLengths = words.map(word => word.length)
   const filteredLength = wordLength.filter(length => length > 3)
-  const avgWordLength = avearage(filteredLength)
-  log(avgWordLength)
+  
+  return average(filteredLength)
 }
 ```
 
@@ -523,8 +421,9 @@ const avgBigWordLength = input => {
 
 ```
 // avgBigWordLength :: String -> Number
-const avgBigWordLength = input =>
-  log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+const avgBigWordLength = function(input) {
+  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+}
 ```
 
 ---
@@ -767,37 +666,7 @@ avgBigWordLength('Hello world how are you?')     // input is String
 
 --
 
-* Type can change multiple times
-
---
-
 * More readable, more compact, clear flow of data along "pipeline", no placeholder variables
-
----
-
-### Composition
-
-* Composition of pure functions mirrors mathematical function composition: <em>(g ∘ f)(x) = g(f(x))</em> (generalized in category theory)
-
---
-
-* Composition is associative: <em>f ∘ (g ∘ h) = (f ∘ g) ∘ h</em>
-
---
-* We can extract any group of functions into their own composition:
-
-```
-// avgBigWordLength :: String -> Number
-const avgBigWordLength =
-  R.compose(log, average, `R.filter(R.lt(3)), R.map(R.length)`, R.split(' '))
-```
-
---
-
-```
-const lengthsLt3 = R.compose(`R.filter(R.lt(3)), R.map(R.length)`)
-const avgBigWordLength = R.compose(log, average, `lengthsLt3`, R.split(' '))
-```
 
 ---
 
@@ -833,6 +702,7 @@ postcodeLength(address2) // Exception: Cannot read property 'replace' of undefin
 --
 
 * We don't want exceptions in our code
+
 * Could wrap `replace` in a function with a null test... but we don't want to do this all the time
 --
 
