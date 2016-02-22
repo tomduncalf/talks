@@ -72,10 +72,15 @@ let minPasswordLength = 8
 
 // Not pure
 const isGoodPassword = function(password) {
-  return password.length > minPasswordLength
+  return password.length >= minPasswordLength
 }
 
 isGoodPassword('tom') // returns: false
+isGoodPassword('tomtomtom') // returns: true
+
+minPasswordLength = 3
+
+isGoodPassword('tom') // returns: true
 isGoodPassword('tomtomtom') // returns: true
 ```
 
@@ -84,7 +89,7 @@ isGoodPassword('tomtomtom') // returns: true
 ```
 // Pure
 const isGoodPassword = function(password, minLength) {
-  return password.length > minLength
+  return password.length >= minLength
 }
 
 isGoodPassword('tom', 8) // returns: false
@@ -117,7 +122,7 @@ isGoodPassword('tomtomtom', 8) // returns: true
 
 --
 
-* We can't - but FP aims to execute them in a controlled way
+* We can't - but functional programming can help us contain them and execute them in a controlled way
 
 ---
 
@@ -330,13 +335,14 @@ add(1, 2) // returns: 3
 * All functions in `ramda` and `lodash/fp` are curried by default and the data argument comes last so we can "pre-fill" the function
 
 ```
-// R.indexOf(search, inputArray) is a curried function: a -> [a] -> Number
+// R.test(pattern, inputString) is a curried function: RegExp -> String -> Boolean
 
-// indexOfAt :: String -> Number
-const indexOfAt = R.indexOf('@')
-indexOfAt('tom@tomduncalf.com') // returns: 3
+// isGmailAddress :: String -> Boolean
+const isGmailAddress = R.test(/\@gmail.com$/)
+isGmailAddress('tduncalf@gmail.com') // returns: true
+isGmailAddress('tom@tomduncalf.com') // returns: false
 
-// We couldn't do this (as easily...) if it were R.indexOf(inputAarray, search)
+// We couldn't do this (as easily...) if it were R.test(inputString, pattern)
 ```
 
 ---
@@ -345,25 +351,25 @@ indexOfAt('tom@tomduncalf.com') // returns: 3
 
 --
 
-* Allows us to easily make new domain-specific functions from generic ones
+* Allows us to easily make new domain-specific functions from generic ones (which encourages us to reuse functions  )
 
 ```
-// indexOfAt :: String -> Number
-const indexOfAt = R.indexOf('@')
+// isGmailAddress :: String -> Boolean
+const isGmailAddress = R.test(/\@gmail.com$/)
 
-indexOfAt('tom@tomduncalf.com') // returns: 3
+isGmailAddress('tduncalf@gmail.com') // returns: true
 ```
 
 --
 
 ```
 // Compared to:
-const indexOfAt = function(input) {
-  return R.indexOf('@', input)
+const isGmailAddress = function(address) {
+  return R.test(/\@gmail.com$/, address)
 }
 
 // or in ES6...
-const indexOfAt = input => R.indexOf('@', input)
+const isGmailAddress = address => R.test(/\@gmail.com$/, address)
 ```
 
 --
@@ -696,7 +702,11 @@ avgBigWordLength('Hello world how are you?')     // input is String
 
 --
 
-* More compact and readable, clear flow of data along "pipeline"
+* More compact and readable (demonstrates "pointfree" style)
+
+* Clear flow of data along "pipeline"
+
+* Encourages re-use and combination of small, generic functions
 
 ---
 
@@ -781,7 +791,7 @@ four.map(x => x + 2) // returns: Container(6)
 ```
 --
 
-* Can map as many times as we want:
+* Can map as many times as we want, the value stays in its container:
 
 ```
 Container.of(['one', 'two']).map(head).map(R.reverse) // returns: Container('eno')
@@ -793,7 +803,9 @@ Container.of(['one', 'two']).map(head).map(R.reverse) // returns: Container('eno
 
 * "A functor is a type that implements `map` and obeys some laws"
 
-* Why would we want to do contain a value and run `map` to get to it?
+--
+
+* Why would we want to contain a value and run `map` to get to it?
 --
 
 
@@ -833,8 +845,6 @@ Maybe.of('hello world').map(R.reverse) // returns: Maybe('dlrow olleh')
 
 --
 
---
-
 ```
 Maybe.of(null).map(R.reverse) // returns: Maybe(null)
 ```
@@ -868,30 +878,34 @@ safeHead([]) // returns: Maybe(null), head would return undefined
 
 --
 
-* Gives safety by forcing calling code to handle the `null` case - we can only get at the value by calling `map`, so we cannot avoid handling `null`s
+* Gives safety by forcing calling code to handle the `null` case - we can only get at the value by calling `map`, so we can't avoid handling `null`s
 
 ```
 safeHead(['one', 'two']).map(R.reverse) // returns: Maybe('eno')
 safeHead([]).map(R.reverse) // returns: Maybe(null)
+
+// We can't ignore the fact that the function returns a Maybe as it won't work:
+R.reverse(safeHead(['one', 'two'])) // returns: []
 ```
 ---
 
 ### Maybe
 
-* We can compose functors just like functions, using `map`
+* We can compose functors just like functions, but using `map`
 
 --
 
 ```
-// headReversed :: [a] -> Maybe String
-const headReversed = R.compose(
-  R.map(R.concat('Reversed head is: ')),
+// headReversedUpper :: [a] -> Maybe String
+const headReversedUpper = R.compose(
+  R.map(R.toUpper),
   R.map(R.reverse),
   safeHead
 )
 
-headReversed(['one', 'two', 'three']) // returns: Maybe('Reversed head is: eno')
-headReversed([]) // returns: Maybe(null)
+headReversedUpper(['one', 'two', 'three']) // returns: Maybe('ENO')
+
+headReversedUpper([]) // returns: Maybe(null)
 ```
 
 --
@@ -1060,7 +1074,7 @@ const urlReversed = new function() {
 --
 
 ```
-urlReversed.unsafePerformIO() // returns: 'moc.elgoog.www//:ptth'
+urlReversed.unsafePerformIO() // returns: 'Reversed URL: moc.elgoog.www//:ptth'
 ```
 
 ---
@@ -1538,7 +1552,7 @@ const firstAddressStreet = R.compose(
 
 ### Links
 
-* The book: <a href='https://github.com/MostlyAdequate/mostly-adequate-guide'>https://github.com/MostlyAdequate/mostly-adequate-guide</a>
+* The book: <a href='https://github.com/MostlyAdequate/mostly-adequate-guide'>Professor Frisby's Mostly Adequate Guide to Functional Programming</a>
 
 * <a href='http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html'>A great explanation of functors, applicatives and monads in pictures</a>
 
@@ -1546,7 +1560,7 @@ const firstAddressStreet = R.compose(
 
 * Monad/functor implementations for JS: <a href='http://cwmyers.github.io/monet.js/'>monet.js</a>, <a href='http://folktalejs.org/'>Folktale</a>, <a href='https://github.com/ramda/ramda-fantasy'>Fantasy Land (Ramda)</a>
 
-* These slides: https://cdn.rawgit.com/tomduncalf/talks/master/FPFundementals/index.html
+* <a href='https://cdn.rawgit.com/tomduncalf/talks/master/FPFundementals/index.html'>These slides</a>
 
 ---
 
