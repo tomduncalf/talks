@@ -43,7 +43,7 @@ class: center, middle
 
 * Functors
 
-<strike>* Monads</strike>
+* <strike>Monads</strike>
 
 ---
 
@@ -390,7 +390,14 @@ const compose = function(f, g) {
 ```
 * `f` and `g` are functions, `x` is the value being piped through them
 
-* Data flows from right to left
+--
+
+```
+// R.add :: Number -> Number -> Number
+R.add(1, 2) // 1 + 2, returns: 3
+// R.multiply :: Number -> Number -> Number
+R.multiply(2, 3) // 2 * 3, returns: 6
+```
 
 --
 
@@ -399,8 +406,8 @@ const compose = function(f, g) {
 const doublePlusOne = compose(R.add(1), R.multiply(2))
 // expands to: R.add(1, R.multiply(2, x))
 
-doublePlusOne(3) // returns: 7
-doublePlusOne(5) // returns: 11
+doublePlusOne(3) // R.add(1, R.multiply(2, 3)) = (2 * 3) + 1 = 7
+doublePlusOne(5) // R.add(1, R.multiply(2, 5)) = (2 * 5) + 1 = 11
 
 
 ```
@@ -409,11 +416,11 @@ doublePlusOne(5) // returns: 11
 
 ### Composition example
 
-* Log the average length of any words longer than 3 characters in an input sentence
+* Return the average length of any words longer than 3 characters in an input sentence, formatted
 
 ```
 // average :: [Number] -> Number
-// log :: String -> String
+// format :: Number -> String
 ```
 
 --
@@ -426,7 +433,7 @@ const avgBigWordLength = function(input) {
   const wordLengths = words.map(word => word.length)
   const filteredLength = wordLength.filter(length => length > 3)
   const averageLength = average(filteredLength)
-  return log(averageLength)
+  return format(averageLength)
 }
 ```
 
@@ -435,7 +442,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -446,7 +453,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -457,7 +464,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(`input.split(' ')`.map(w => w.length).filter(l => l > 3)))
+  return format(average(`input.split(' ')`.map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -468,7 +475,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ')`.map(w => w.length)`.filter(l => l > 3)))
+  return format(average(input.split(' ')`.map(w => w.length)`.filter(l => l > 3)))
 }
 ```
 
@@ -479,7 +486,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length)`.filter(l => l > 3)`))
+  return format(average(input.split(' ').map(w => w.length)`.filter(l => l > 3)`))
 }
 ```
 
@@ -490,7 +497,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(`average`(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(`average`(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -501,7 +508,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return `log`(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return `format`(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -512,7 +519,7 @@ const avgBigWordLength = function(input) {
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -520,7 +527,7 @@ With functions:
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(R.filter(R.lt(3), R.map(R.length, R.split(' ', input)))))
+  return format(average(R.filter(R.lt(3), R.map(R.length, R.split(' ', input)))))
 }
 ```
 
@@ -531,7 +538,7 @@ With composition (and curried functions):
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength =
-  R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
+  R.compose(format, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ---
@@ -541,7 +548,7 @@ const avgBigWordLength =
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -550,7 +557,7 @@ With composition (and curried functions):
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength =
-  `R.compose`(log, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
+  `R.compose`(format, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ```
@@ -564,7 +571,7 @@ avgBigWordLength('Hello world how are you?')     // input is String
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -573,38 +580,13 @@ With composition (and curried functions):
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength =
-  R.compose(log, average, R.filter(R.lt(3)), R.map(R.length), `R.split(' ')`)
+  R.compose(format, average, R.filter(R.lt(3)), R.map(R.length), `R.split(' ')`)
 ```
 
-
-```
-avgBigWordLength('Hello world how are you?')     // input is String
-// split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
-```
-
----
-
-### Composition example
-
-```
-// avgBigWordLength :: String -> String
-const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
-}
-```
-
-With composition (and curried functions):
-
-```
-// avgBigWordLength :: String -> String
-const avgBigWordLength =
-  R.compose(log, average, R.filter(R.lt(3)), `R.map(R.length)`, R.split(' '))
-```
 
 ```
 avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
-// map(length):   [5, 5, 3, 3, 4]                           [Number]
 ```
 
 ---
@@ -614,7 +596,7 @@ avgBigWordLength('Hello world how are you?')     // input is String
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -623,14 +605,13 @@ With composition (and curried functions):
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength =
-  R.compose(log, average, `R.filter(R.lt(3))`, R.map(R.length), R.split(' '))
+  R.compose(format, average, R.filter(R.lt(3)), `R.map(R.length)`, R.split(' '))
 ```
 
 ```
 avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 // map(length):   [5, 5, 3, 3, 4]                           [Number]
-// filter(lt(3)): [5, 5]                                    [Number]
 ```
 
 ---
@@ -640,7 +621,7 @@ avgBigWordLength('Hello world how are you?')     // input is String
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -649,7 +630,7 @@ With composition (and curried functions):
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength =
-  R.compose(log, `average`, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
+  R.compose(format, average, `R.filter(R.lt(3))`, R.map(R.length), R.split(' '))
 ```
 
 ```
@@ -657,8 +638,8 @@ avgBigWordLength('Hello world how are you?')     // input is String
 // split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
 // map(length):   [5, 5, 3, 3, 4]                           [Number]
 // filter(lt(3)): [5, 5]                                    [Number]
-// average:       5                                          Number
 ```
+
 ---
 
 ### Composition example
@@ -666,7 +647,7 @@ avgBigWordLength('Hello world how are you?')     // input is String
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength = function(input) {
-  return log(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
 }
 ```
 
@@ -675,7 +656,7 @@ With composition (and curried functions):
 ```
 // avgBigWordLength :: String -> String
 const avgBigWordLength =
-  R.compose(`log`, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
+  R.compose(format, `average`, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
 ```
 
 ```
@@ -684,7 +665,33 @@ avgBigWordLength('Hello world how are you?')     // input is String
 // map(length):   [5, 5, 3, 3, 4]                           [Number]
 // filter(lt(3)): [5, 5]                                    [Number]
 // average:       5                                          Number
-// log:           '5'                                        String
+```
+---
+
+### Composition example
+
+```
+// avgBigWordLength :: String -> String
+const avgBigWordLength = function(input) {
+  return format(average(input.split(' ').map(w => w.length).filter(l => l > 3)))
+}
+```
+
+With composition (and curried functions):
+
+```
+// avgBigWordLength :: String -> String
+const avgBigWordLength =
+  R.compose(`format`, average, R.filter(R.lt(3)), R.map(R.length), R.split(' '))
+```
+
+```
+avgBigWordLength('Hello world how are you?')     // input is String
+// split:         ['hello', 'world', 'how', 'are', 'you?']  [String]
+// map(length):   [5, 5, 3, 3, 4]                           [Number]
+// filter(lt(3)): [5, 5]                                    [Number]
+// average:       5                                          Number
+// format:        'average is 5.00'                          String
 ```
 
 --
@@ -711,18 +718,22 @@ head(['one', 'two', 'three']) // returns: 'one'
 --
 
 ```
-// reverseFirst :: [String] -> String
-const reverseFirst = R.compose(R.reverse, first)
+// reverseHead :: [String] -> String
+const reverseHead = R.compose(R.reverse, head)
 
-reverseFirst(['one', 'two', 'three']) // returns: 'eno'
+reverseHead(['one', 'two', 'three']) // returns: 'eno'
 ```
 
 --
 
 ```
 head([]) // returns: undefined
+```
 
-reverseFirst([]) // Exception: Cannot read property 'length' of undefined
+--
+
+```
+reverseHead([]) // Exception: Cannot read property 'length' of undefined
 ```
 
 --
@@ -731,10 +742,7 @@ reverseFirst([]) // Exception: Cannot read property 'length' of undefined
 
 --
 
-* Could wrap `reverse` in a function with a null test, but we don't want to have to do this all the time
---
-
-* And what about handling side effects?!
+* Could wrap `reverse` in a function with a null test, but we don't want to have to do this for every function
 
 ---
 
@@ -789,8 +797,8 @@ Container.of(['one', 'two']).map(head).map(R.reverse) // returns: Container('eno
 --
 
 
-* Abstraction of function application - with `map`, we ask the container to run the function for us
-* Allows to provide useful behaviour while mapping
+* Abstraction of function application - with `map`, we ask the container to run the function for us rather than running it directly on the value
+* Allows a functor to provide useful behaviour while mapping
 ---
 
 ### Maybe
@@ -825,15 +833,18 @@ Maybe.of('hello world').map(R.reverse) // returns: Maybe('dlrow olleh')
 
 --
 
-```
-Container.of(null).map(R.reverse) // Exception: Cannot read property 'length' of null
-```
-
 --
 
 ```
 Maybe.of(null).map(R.reverse) // returns: Maybe(null)
 ```
+
+--
+
+```
+Container.of(null).map(R.reverse) // Exception: Cannot read property 'length' of null
+```
+
 
 ---
 
@@ -851,13 +862,13 @@ const safeHead = function(list) {
   return Maybe.of(list[0])
 }
 
-safeHead([1, 2, 3]) // returns: Maybe(1)
-safeHead([]) // returns: Maybe(null)
+safeHead(['one', 'two', 'three']) // returns: Maybe('one'), head would return 'one'
+safeHead([]) // returns: Maybe(null), head would return undefined
 ```
 
 --
 
-* Gives safety by forcing calling code to handle the `null` case - we can only get at the value by calling `map`
+* Gives safety by forcing calling code to handle the `null` case - we can only get at the value by calling `map`, so we cannot avoid handling `null`s
 
 ```
 safeHead(['one', 'two']).map(R.reverse) // returns: Maybe('eno')
@@ -869,19 +880,27 @@ safeHead([]).map(R.reverse) // returns: Maybe(null)
 
 * We can compose functors just like functions, using `map`
 
+--
+
 ```
 // headReversed :: [a] -> Maybe String
 const headReversed = R.compose(
-  R.map(R.concat('Reversed: ')),
+  R.map(R.concat('Reversed head is: ')),
   R.map(R.reverse),
   safeHead
 )
 
-headReversed(['one', 'two', 'three']) // returns: Maybe('Reversed: eno')
+headReversed(['one', 'two', 'three']) // returns: Maybe('Reversed head is: eno')
 headReversed([]) // returns: Maybe(null)
 ```
 
-* The function being called doesn't have to know about functors - map "lifts" the function
+--
+
+* `null` propogrates through the composition without causing errors
+
+--
+
+* The function being called doesn't have to know about functors - `map` "lifts" the function
 
 ---
 
@@ -893,7 +912,7 @@ headReversed([]) // returns: Maybe(null)
 
 --
 
-* We can make a function which has a side effect pure by wrapping it in another function:
+* We can make a function which has a side effect pure by wrapping it in another function, delaying execution:
 
 ```
 // getFromStorage :: String -> (_ -> String)
@@ -902,16 +921,24 @@ const getFromStorage = function(key) {
     return window.localStorage[key]
   }
 }
-
-// window.localStorage = { test: 'hello world' }
-
-getFromStorage('test') // returns: function() { return window.localStorage['test'] }
-getFromStorage('test')() // returns: 'hello world'
 ```
 --
 
 * We always get the same output for the same input (a function that gets that key from localStorage, rather than the actual value)
 
+--
+
+```
+// window.localStorage = { test: 'hello world' }
+
+getFromStorage('test') // returns: function() { return window.localStorage['test'] }
+```
+
+--
+```
+const getTest = getFromStorage('test') // function() { return window.localStorage['test'] }
+getTest() // returns: 'hello world'
+```
 --
 
 * But how can we make this useful for managing side effects?
@@ -937,13 +964,13 @@ IO.of = function(x) {
 --
 
 ```
-// url :: IO String
-const url = IO.of(window.location.href) // returns: {__value: [Function]}
+// currentUrl :: IO String
+const currentUrl = IO.of(window.location.href) // returns: {__value: [Function]}
 ```
 --
 
 ```
-const url = new function() {
+const currentUrl = new function() {
   this.__value = function() {
     return window.location.href
   }
@@ -953,8 +980,10 @@ const url = new function() {
 --
 
 ```
-url.__value() // returns: http://www.google.com
+currentUrl.__value() // returns: http://www.google.com
 ```
+
+* Calling code is responsible for running side effects when a function returns `IO` - keeps our code pure
 
 ---
 
@@ -975,12 +1004,12 @@ IO.of = function(x) {
 ```
 
 ```
-// url :: IO String
-const url = IO.of(window.location.href) // returns: {`unsafePerformIO`: [Function]}
+// currentUrl :: IO String
+const currentUrl = IO.of(window.location.href) // returns: {`unsafePerformIO`: [Function]}
 ```
 
 ```
-const url = new function() {
+const currentUrl = new function() {
   this.`unsafePerformIO` = function() {
     return window.location.href
   }
@@ -988,8 +1017,10 @@ const url = new function() {
 ```
 
 ```
-url.`unsafePerformIO`() // returns: http://www.google.com
+currentUrl.`unsafePerformIO`() // returns: 'http://www.google.com'
 ```
+
+* Calling code is responsible for running side effects when a function returns `IO` - keeps our code pure
 
 ---
 
@@ -1006,11 +1037,11 @@ IO.prototype.map = function(fn) {
 * We can use `map` to build up a composed chain of actions, ready to be performed by calling `unsafePerformIO`
 
 ```
-// url :: IO String
-const url = IO.of(window.location.href)
+// currentUrl :: IO String
+const currentUrl = IO.of(window.location.href)
 
-// urlReversed :: IO String
-const urlReversed = url.map(R.reverse).map(R.concat('Reversed URL: '))
+// currentUrlReversed :: IO String
+const currentUrlReversed = url.map(R.reverse).map(R.concat('Reversed URL: '))
 ```
 
 --
@@ -1063,7 +1094,6 @@ const readFile = filename => {
 ```
 
 ```
-// myFileLength :: Task Error Number
 const linesInMyFile = readFile('my_file.txt').map(R.split('\n')).map(R.length)
 
 linesInMyFile.fork(
@@ -1074,7 +1104,13 @@ linesInMyFile.fork(
 
 --
 
-* Looks familiar? `Promises` are basically `Tasks`, with `then` instead of `map`
+* Looks familiar? `Promises` are similar to `Tasks`, with `then` instead of `map` (and without deferred execution)
+
+```
+const linesInMyFile = readFile('my_file.txt').then(R.split('\n')).then(R.length)
+  .then(result => console.log('There are ' + result + ' lines in my file'))
+  .catch(error => console.error(error))
+```
 
 ---
 
