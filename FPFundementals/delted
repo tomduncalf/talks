@@ -51,6 +51,33 @@ doSomething(1)(2)(3) === doSomething(1, 2, 3)
 * Real implementation of `Maybe` is split into two types rather than doing a `null` check: `Maybe.Just(x)` and `Maybe.Nothing`
 
 
+
+
+
+
+---
+
+### Maybe
+
+* We can get the value out of `Maybe` using the `maybe` function
+
 ```
-const safeHead = xs => xs.length ? Maybe.Just(xs[0]) : Maybe.Nothing()
+// getResult :: Maybe a -> a | String
+const getResult = Maybe.maybe('No item found', x => x)
+
+getResult(safeHead([1, 2, 3])) // returns: 1
+getResult(safeHead([])) // returns: 'No item found'
+```
+
+--
+
+* Or using `getOrElse`
+
+```
+Maybe.prototype.getOrElse = function(defaultValue) {
+  return this.isNothing() ? defaultValue : this.__value
+}
+
+safeHead([1, 2, 3]).getOrElse('No item found') // returns: 1
+safeHead([]).getOrElse('No item found') // returns: 'No item found'
 ```

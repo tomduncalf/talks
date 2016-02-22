@@ -43,7 +43,7 @@ class: center, middle
 
 * Functors
 
-* Monads
+<strike>* Monads</strike>
 
 ---
 
@@ -348,14 +348,22 @@ indexOfAt('tom@tomduncalf.com') // returns: 3
 * Allows us to easily make new domain-specific functions from generic ones
 
 ```
-// R.test is a curried function: Regexp -> String -> Boolean
-R.test(/hello/, 'hello world') // returns: true
+// indexOfAt :: String -> Number
+const indexOfAt = R.indexOf('@')
 
-// isGmailAddress :: String -> Boolean
-const isGmailAddress = R.test(new RegExp('@gmail.com$'))
+indexOfAt('tom@tomduncalf.com') // returns: 3
+```
 
-isGmailAddress('test@gmail.com') // returns: true
-isGmailAddress('test@hotmail.com') // returns: false
+--
+
+```
+// Compared to:
+const indexOfAt = function(input) {
+  return R.indexOf('@', input)
+}
+
+// or in ES6...
+const indexOfAt = input => R.indexOf('@', input)
 ```
 
 --
@@ -683,10 +691,6 @@ avgBigWordLength('Hello world how are you?')     // input is String
 
 * More compact and readable, clear flow of data along "pipeline"
 
---
-
-* "Pointfree" style: doesn't mention the data we are operating on
-
 ---
 
 ### Composition
@@ -696,26 +700,29 @@ avgBigWordLength('Hello world how are you?')     // input is String
 --
 
 ```
-const address1 = { street: 'Test Street', postcode: 'A1 1AA' }
-const address2 = { street: 'Test Street' }
+// head :: [a] -> a
+const head = function(list) {
+  return list[0]
+}
 
-// R.prop :: b -> {b: a} -> a | Undefined
-R.prop('postcode', address1) // returns: 'A1 1AA'
-R.prop('postcode', address2) // returns: undefined
+head(['one', 'two', 'three']) // returns: 'one'
 ```
 
 --
 
 ```
-// postcodeLength :: Object -> Number | ???
-const postcodeLength = R.compose(R.length, R.replace(/ /, ''), R.prop('postcode'))
+// reverseFirst :: [String] -> String
+const reverseFirst = R.compose(R.reverse, first)
+
+reverseFirst(['one', 'two', 'three']) // returns: 'eno'
 ```
 
 --
 
 ```
-postcodeLength(address1) // returns: 5
-postcodeLength(address2) // Exception: Cannot read property 'replace' of undefined
+head([]) // returns: undefined
+
+reverseFirst([]) // Exception: Cannot read property 'length' of undefined
 ```
 
 --
@@ -724,7 +731,7 @@ postcodeLength(address2) // Exception: Cannot read property 'replace' of undefin
 
 --
 
-* Could wrap `replace` in a function with a null test, but we don't want to have to do this all the time
+* Could wrap `reverse` in a function with a null test, but we don't want to have to do this all the time
 --
 
 * And what about handling side effects?!
@@ -750,7 +757,6 @@ Container.of = function(x) {
 ```
 Container.of(4) // returns: {"__value": 4}, but let's call this Container(4)
 Container.of('hello world') // returns: Container('hello world')
-Container.of(Container.of({ id: 1 })) // returns: Container(Container({ id: 1 }))
 ```
 --
 
@@ -767,9 +773,10 @@ four.map(x => x + 2) // returns: Container(6)
 ```
 --
 
+* Can map as many times as we want:
+
 ```
-const hello = Container.of({ message: 'hello world' })
-hello.map(R.prop('message')).map(R.length)) // returns: Container(11)
+Container.of(['one', 'two']).map(head).map(R.reverse) // returns: Container('eno')
 ```
 
 ---
@@ -813,20 +820,19 @@ Maybe.prototype.isNothing = function() {
 
 ```
 Maybe.of('hello world') // returns: Maybe('hello world')
-Maybe.of('hello world').map(R.match(/hello/)).map(R.length) // returns: Maybe(1)
+Maybe.of('hello world').map(R.reverse) // returns: Maybe('dlrow olleh')
 ```
 
 --
 
 ```
-Container.of(null).map(R.match(/hello/)).map(R.length)
-  // Exception: TypeError: Cannot read property 'match' of null
+Container.of(null).map(R.reverse) // Exception: Cannot read property 'length' of null
 ```
 
 --
 
 ```
-Maybe.of(null).map(R.match(/hello/)).map(R.length) // returns: Maybe(null)
+Maybe.of(null).map(R.reverse) // returns: Maybe(null)
 ```
 
 ---
@@ -841,8 +847,8 @@ Maybe.of(null).map(R.match(/hello/)).map(R.length) // returns: Maybe(null)
 
 ```
 // safeHead :: [a] -> Maybe(a)
-const safeHead = function(xs) {
-  return Maybe.of(xs[0])
+const safeHead = function(list) {
+  return Maybe.of(list[0])
 }
 
 safeHead([1, 2, 3]) // returns: Maybe(1)
@@ -854,60 +860,36 @@ safeHead([]) // returns: Maybe(null)
 * Gives safety by forcing calling code to handle the `null` case - we can only get at the value by calling `map`
 
 ```
-safeHead(['one', 'two']).map(R.length) // returns: Maybe(3)
-safeHead([]).map(R.length) // returns: Maybe(null)
+safeHead(['one', 'two']).map(R.reverse) // returns: Maybe('eno')
+safeHead([]).map(R.reverse) // returns: Maybe(null)
 ```
 ---
 
 ### Maybe
 
-* `map` allows us to compose functors
+* We can compose functors just like functions, using `map`
 
 ```
-// headLength :: [a] -> Maybe String
-const headLength = R.compose(
-  R.map(R.concat('Length: ')),
-  R.map(R.length),
+// headReversed :: [a] -> Maybe String
+const headReversed = R.compose(
+  R.map(R.concat('Reversed: ')),
+  R.map(R.reverse),
   safeHead
 )
 
-headLength(['one', 'two', 'three']) // returns: Maybe('Length: 3')
-headLength([]) // returns: Maybe(null)
+headReversed(['one', 'two', 'three']) // returns: Maybe('Reversed: eno')
+headReversed([]) // returns: Maybe(null)
 ```
---
 
 * The function being called doesn't have to know about functors - map "lifts" the function
 
 ---
 
-### Maybe
-
-* We can get the value out of `Maybe` using the `maybe` function
-
-```
-// getResult :: Maybe a -> a | String
-const getResult = Maybe.maybe('No item found', x => x)
-
-getResult(safeHead([1, 2, 3])) // returns: 1
-getResult(safeHead([])) // returns: 'No item found'
-```
+### IO
 
 --
 
-* Or using `getOrElse`
-
-```
-Maybe.prototype.getOrElse = function(defaultValue) {
-  return this.isNothing() ? defaultValue : this.__value
-}
-
-safeHead([1, 2, 3]).getOrElse('No item found') // returns: 1
-safeHead([]).getOrElse('No item found') // returns: 'No item found'
-```
-
----
-
-### IO
+* A pure function can't have side effects
 
 --
 
@@ -920,9 +902,17 @@ const getFromStorage = function(key) {
     return window.localStorage[key]
   }
 }
-```
 
-* We always get the same output for the same input (a function that gets that key from localStorage)
+// window.localStorage = { test: 'hello world' }
+
+getFromStorage('test') // returns: function() { return window.localStorage['test'] }
+getFromStorage('test')() // returns: 'hello world'
+```
+--
+
+* We always get the same output for the same input (a function that gets that key from localStorage, rather than the actual value)
+
+--
 
 * But how can we make this useful for managing side effects?
 
@@ -930,10 +920,11 @@ const getFromStorage = function(key) {
 
 ### IO
 
+* IO wraps its value in a function
+
 ```
-const IO = function(fn) {
-  // Same as __value, but renamed
-  this.unsafePerformIO = fn
+const IO = function(x) {
+  this.__value = x
 }
 
 IO.of = function(x) {
@@ -941,7 +932,70 @@ IO.of = function(x) {
     return x
   })
 }
+```
 
+--
+
+```
+// url :: IO String
+const url = IO.of(window.location.href) // returns: {__value: [Function]}
+```
+--
+
+```
+const url = new function() {
+  this.__value = function() {
+    return window.location.href
+  }
+}
+```
+
+--
+
+```
+url.__value() // returns: http://www.google.com
+```
+
+---
+
+### IO
+
+* IO wraps its value in a function
+
+```
+const IO = function(x) {
+  this.`unsafePerformIO` = x
+}
+
+IO.of = function(x) {
+  return new IO(function() {
+    return x
+  })
+}
+```
+
+```
+// url :: IO String
+const url = IO.of(window.location.href) // returns: {`unsafePerformIO`: [Function]}
+```
+
+```
+const url = new function() {
+  this.`unsafePerformIO` = function() {
+    return window.location.href
+  }
+}
+```
+
+```
+url.`unsafePerformIO`() // returns: http://www.google.com
+```
+
+---
+
+### IO
+
+```
 IO.prototype.map = function(fn) {
   return new IO(R.compose(fn, this.unsafePerformIO))
 }
@@ -949,37 +1003,14 @@ IO.prototype.map = function(fn) {
 
 --
 
-```
-// url :: IO String
-const url = IO.of(window.location.href) // returns: {unsafePerformIO: [Function]}
-
-url.unsafePerformIO() // returns: http://www.google.com
-```
-
---
-
-```
-const url = new function() {
-  this.unsafePerformIO = function() {
-    return window.location.href
-  }
-}
-```
-
----
-
-### IO
-
 * We can use `map` to build up a composed chain of actions, ready to be performed by calling `unsafePerformIO`
 
 ```
 // url :: IO String
 const url = IO.of(window.location.href)
 
-// urlEmail :: IO String
-const urlEmail = url.map(R.match(/[a-z]*\.com/)).map(R.nth(0)).map(R.concat('@'))
-
-urlEmail.unsafePerformIO() // returns: '@google.com'
+// urlReversed :: IO String
+const urlReversed = url.map(R.reverse).map(R.concat('Reversed URL: '))
 ```
 
 --
@@ -987,19 +1018,29 @@ urlEmail.unsafePerformIO() // returns: '@google.com'
 * Internally, we have built up something like:
 
 ```
-const urlEmail = new function() {
+const urlReversed = new function() {
   this.unsafePerformIO = R.compose(
-    R.concat('@'),
-    R.nth(0),
-    R.match(/[a-z]*\.com/),
+    R.concat('Reversed URL:'),
+    R.reverse,
     function() { return window.location.href }
   )
 }
 ```
-
 --
 
-* IO enables us to control side effects by pushing responsibility for running them to calling code (and indicates side effects in the type signature)
+```
+urlReversed.unsafePerformIO() // returns: 'moc.elgoog.www//:ptth'
+```
+
+---
+
+### IO
+
+* IO enables us to control side effects by pushing responsibility for running them to calling code
+
+* The fact that the function has side effects apparent in the type signature
+
+
 ---
 
 ### Task
@@ -1441,7 +1482,37 @@ const firstAddressStreet = R.compose(
 
 ### Summary
 
+--
 
+* FP concepts don't have to be as complicated as they are sometimes made out to be
+
+--
+
+* We can build up a powerful toolbox to write elegant, clean code
+
+--
+
+* We don't need to use a "pure" FP language to take advantage of functional programming concepts
+
+--
+
+* Read the book if you want to know more!
+
+---
+
+### Links
+
+* The book: <a href='https://github.com/MostlyAdequate/mostly-adequate-guide'>https://github.com/MostlyAdequate/mostly-adequate-guide</a>
+
+* <a href='http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html'>A great explanation of functors, applicatives and monads in pictures</a>
+
+* FP Libraries: <a href='http://ramdajs.com'>Ramda</a>, <a href='http://lodash.com'>Lodash</a>
+
+* Monad/functor implementations for JS: <a href='http://cwmyers.github.io/monet.js/'>monet.js</a>, <a href='http://folktalejs.org/'>Folktale</a>, <a href='https://github.com/ramda/ramda-fantasy'>Fantasy Land (Ramda)</a>
+
+---
+
+### Any questions?
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
     </script>
