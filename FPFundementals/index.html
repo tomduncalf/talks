@@ -116,13 +116,15 @@ isGoodPassword('tomtomtom', 8) // returns: true
 
   * changing the file system
 
+* "Side effects are a primary cause of incorrect behavior"
+
 --
 
 * How can we program without side effects?!
 
 --
 
-* We can't - but functional programming can help us contain them and execute them in a controlled way
+* We can't - but functional programming techniques can help us contain them and execute them in a controlled way
 
 ---
 
@@ -193,8 +195,8 @@ const splitByCharacter = function(inputString, char) {
 --
 
 ```
-// splitAndTransformWords :: String -> (String -> String) -> [String]
-const splitAndTransformWords = function(inputString, transformFn) {
+// splitAndTransformWordsToNumbers :: String -> (String -> Number) -> [Number]
+const splitAndTransformWordsToNumbers  = function(inputString, transformFn) {
     return inputString.split(' ').map(word => transformFn(word))
 }
 ```
