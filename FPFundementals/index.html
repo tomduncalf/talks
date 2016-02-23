@@ -225,19 +225,15 @@ const transformArray = function(inputArray, transformFn) {
 --
 
 ```
-// This...
-// debug :: String -> String
-const debug = function(string) {
-  console.log(string)
+// functionFunction :: String -> (String -> String)
+const functionFunction = function(string) {
+  return function() {
+    return 'Hello ' + string
+  }
 }
-```
 
---
-
-```
-// ...is the same as:
-// debug :: String -> String
-const debug = console.log
+functionFunction('world') // returns: function() { ... }
+functionFunction('world')() // returns: 'Hello world'
 ```
 
 --
@@ -260,6 +256,8 @@ passwords.map(isGoodPassword) // returns [false, true, false]
 ### Why first class functions?
 
 * Less code, more readable
+
+* Flexibility of functions accepting and returning other functions
 
 * Reduces the need to name things which allows us to write more generic code - a common theme in functional programming
 
@@ -1536,7 +1534,7 @@ const firstAddressStreet = R.compose(
 
 --
 
-* FP concepts don't have to be as complicated as they are sometimes made out to be
+* FP concepts don't have to be as theoretical as they are sometimes made out to be - useful even without understanding mathematical foundations
 
 --
 
