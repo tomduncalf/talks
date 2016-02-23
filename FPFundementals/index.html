@@ -1054,8 +1054,8 @@ IO.prototype.map = function(fn) {
 // currentUrl :: IO String
 const currentUrl = IO.of(window.location.href)
 
-// currentUrlReversed :: IO String
-const currentUrlReversed = url.map(R.reverse).map(R.concat('Reversed URL: '))
+// urlReversed :: IO String
+const urlReversed = currentUrl.map(R.reverse).map(R.concat('Reversed URL: '))
 ```
 
 --
@@ -1528,6 +1528,10 @@ const firstAddressStreet = R.compose(
 )
 ```
 
+--
+
+* `Maybe` is a simple example, but functors can represent lots of things (side effects, async actions) and monads define how these can be chained together
+
 ---
 
 ### Summary
@@ -1538,7 +1542,7 @@ const firstAddressStreet = R.compose(
 
 --
 
-* We can build up a powerful toolbox to write elegant, clean code
+* We can build up a powerful toolbox to write elegant, clean code, backed up by mathematical rules
 
 --
 
