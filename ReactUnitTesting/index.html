@@ -20,7 +20,7 @@
       }
 
       .remark-container, .remark-slide-content {
-          background: #222;
+          background: #232323;
       }
 
       h1, h2, h3 {
@@ -62,13 +62,220 @@ class: center, middle
 
 * Common scenarios
 
+---
+
+### What is unit testing?
+
+<blockquote>“Unit testing is a software development process in which the smallest testable parts of an application, called units, are individually and independently scrutinized for proper operation. Unit testing is often automated but it can also be done manually.”</quote>
+
+--
+
+* Example: "`add(1, 1)` should equal `2`"
+
+--
+
+* How small should a unit be?
+
+--
+
+* Integration testing, end to end testing
+
+???
+How small? ideally testing a small piece of code such as a (public) function with no depedencies on other parts of your code - library dependencies are ok
+
+---
+
+### Why unit test?
+
+--
+* Check our code behaves as we expect it to
+
+--
+
+* Check our code handles edge cases/errors correctly
+
+--
+
+* Check our code is syntactically correct (especially in a dynamic language)
+
+--
+
+* Reduce dependency on end-to-end (automated/manual) tests
+
+--
+
+* Acts as "executable documentation" for our code
+
+--
+
+* Enables refactoring with confidence
+
+--
+
+* Helps writing code where inputs and outputs are known but method isn't
+
+--
+
+* Can help us write more modular code
+
+
+???
+Dev's opinions on unit testing run from "won't write anything without a unit test" to "won't write a unit test for anything"
+Does represent extra effort so why should we do it?
+
+Document e.g. that a certain edge case handling is correct
+
+---
+
+### Testing Javascript: `mocha`
+
+--
+
+* Lots of libraries and tools to choose from: `mocha`, `karma`, `jasmine`, `qunit`, `jsunit`, `wallaby`, `chutzpah`, `ava`, `tape`, `chai`, `sinon`, `jest`...
+
+--
+
+* We will use `mocha` as the core test framework and test runner
+
+
+```
+// add.js
+module.exports = (a, b) => a + b
+```
+
+```
+// add.spec.js
+const assert = require('assert')
+const add = require('./add')
+
+describe('add function', () => {
+    it('should add two numbers together correctly', () => {
+        assert(add(1, 2) === 3)
+    })
+})
+```
+
+```bash
+$ npm install -g mocha
+$ mocha add.spec.js
+
+  add function
+    [✓] should add two numbers together correctly
+
+  [1 passing] (7ms)
+```
+
+---
+
+### Testing Javascript: `mocha`
+
+```
+const assert = require('assert')
+const add = require('./add')
+
+describe('add function', () => {
+    it('should add three numbers together correctly', () => {
+        assert(add(1, 2, 3) === 6)
+    })
+})
+```
+
+```bash
+$ mocha add.spec.js
+
+  add function
+    ✓ should add two numbers together correctly
+    1) should add three numbers together correctly
+
+  1 passing (9ms)
+  1 failing
+
+  1) add function should add three numbers together correctly:
+
+      AssertionError: false == true
+      + expected - actual
+
+      -false
+      +true
+
+      at Context.<anonymous> (1a-failures.js:11:9)
+```
+
+---
+
+### Testing Javascript: `chai`
+
+* `chai` is an assertion library, which allows us to write our assertions in three ways:
+
+```
+describe('add function', () => {
+    it('should add two numbers together correctly', () => {
+        // BDD "should" style
+        add(1, 2).should.equal(3)
+
+        // BDD "expect" style
+        expect(add(1, 2)).to.equal(3)
+
+        // TDD "assert" style
+        assert.equal(add(1, 2), 3)
+    })
+})
+```
+
+--
+
+* We will use BDD `expect` style:
+
+```
+expect(foo).to.be.a('string')
+expect(foo).to.equal('bar')
+expect(foo).to.have.length(3)
+expect(tea).to.have.property('flavors').with.length(3)
+```
+
+---
+
+### Testing Javascript: `chai`
+
+* Error output is more useful with `chai`:
+
+```
+it('should add three numbers together correctly', () => {
+    expect(add(1, 2, 3)).to.equal(6)
+})
+```
+
+```bash
+$ mocha add.spec.js
+
+  add function
+    1) should add three numbers together correctly
+
+  0 passing (9ms)
+  1 failing
+
+  1) add function should add three numbers together correctly:
+
+      AssertionError: expected 3 to equal 6
+      + expected - actual
+
+      -3
+      +6
+
+      at Context.<anonymous> (add.spec.js:8:33)
+```
+
+
+
+
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
     </script>
     <script>
       var slideshow = remark.create({
         highlightLanguage: 'javascript',
-        highlightSpans: true
+        highlightSpans: true,
+        highlightStyle: 'sunburst'
       });
     </script>
   </body>
