@@ -100,7 +100,7 @@ How small? ideally testing a small piece of code such as a (public) function wit
 
 --
 
-* Reduce dependency on end-to-end (automated/manual) tests - faster, pinpoints failures
+* Reduce dependency on end-to-end tests - faster, more accurate
 
 --
 
@@ -116,7 +116,7 @@ How small? ideally testing a small piece of code such as a (public) function wit
 
 --
 
-* Can help us write more modular code
+* Can help us write better code
 
 
 ???
@@ -302,7 +302,168 @@ $ mocha add.spec.js
 
 
 
+---
 
+### Basic approach
+
+* Simple `Hello World` component
+
+```
+// HelloWorld.js
+import React from 'react'
+
+export default () => <div>Hello world</div>
+```
+
+```
+// HelloWorld.spec.js
+import { expect } from 'chai'
+import React from 'react'
+import { createRenderer } from 'react-addons-test-utils'
+
+import HelloWorld from './HelloWorld'
+
+describe('HelloWorld component', () => {
+    it('should render correctly', () => {
+        const renderer = createRenderer()
+        renderer.render(<HelloWorld />)
+
+        const actual = renderer.getRenderOutput()
+
+        expect(actual.type).to.equal('div')
+        expect(actual.props).to.deep.equal({ children: 'Hello world' })
+    })
+})
+```
+
+???
+Quite painful to write/read
+Object diffs quite hard to read
+
+---
+
+### Improvement: `jsx-chai`
+
+* https://github.com/bkonkle/jsx-chai, based on [expect-jsx](https://blog.algolia.com/how-we-unit-test-react-components-using-expect-jsx/)
+
+```
+import chai, { expect } from 'chai'
+import jsxChai from 'jsx-chai'
+chai.use(jsxChai)
+
+import React from 'react'
+import { createRenderer } from 'react-addons-test-utils'
+
+import HelloWorld from './HelloWorld'
+
+describe('HelloWorld component', () => {
+    it('should render correctly', () => {
+        const renderer = createRenderer()
+        renderer.render(<HelloWorld />)
+
+        const actual = renderer.getRenderOutput()
+
+        expect(actual).to.deep.equal(<div>Hello world</div>)
+    })
+})
+```
+
+???
+Easier to write/read
+Better diffs
+Quite brittle
+
+---
+
+# Introducing: `enzyme`
+
+* https://github.com/airbnb/enzyme
+
+* Provides an API for easily asserting, mainpulating and traversing React components output
+
+* Mimick's jQuery's API for DOM manipulation and traversal
+
+* Works with all major test runners and assertion libraries
+
+---
+
+# Introducing: `enzyme`
+
+```
+import { expect } from 'chai'
+import { shallow } from 'enzyme'
+import React from 'react'
+
+import HelloWorld from './HelloWorld'
+
+describe('HelloWorld component', () => {
+    it('should render correctly', () => {
+        const wrapper = shallow(<HelloWorld />)
+
+        expect(wrapper.equals(<div>Hello world</div>)).to.be.true
+    })
+})
+```
+
+---
+
+# Introducing: `enzyme`
+
+```
+import { expect } from 'chai'
+import { shallow } from 'enzyme'
+import React from 'react'
+
+import HelloWorld from './HelloWorld'
+
+describe('HelloWorld component', () => {
+    it('should render correctly', () => {
+        const wrapper = shallow(<HelloWorld />)
+
+        expect(wrapper.equals(<div>Hello world</div>)).to.be.true
+
+        expect(wrapper.find('<div/>')).to.have.length(1)
+
+        expect(wrapper.contains('Hello world')).to.be.true
+    })
+})
+```
+
+---
+
+# Introducing: `chai-enzyme`
+
+```
+import chai, { expect } from 'chai'
+import chaiEnzyme from 'chai-enzyme'
+chai.use(chaiEnzyme())
+
+import { shallow } from 'enzyme'
+import React from 'react'
+
+import HelloWorld from './HelloWorld'
+
+describe('HelloWorld component chai-enzyme', () => {
+    it('should render correctly', () => {
+        const wrapper = shallow(<HelloWorld />)
+
+        // expect(wrapper.equals(<div>Hello world</div>)).to.be.true
+        expect(wrapper).to.have.html('<div>Hello world</div>')
+
+        // expect(wrapper.find('div')).to.have.length(1)
+        expect(wrapper).to.have.exactly(1).descendants('div')
+        
+        // expect(wrapper.contains('Hello world')).to.be.true
+        expect(wrapper).to.contain('Hello world')
+    })
+})
+```
+
+---
+
+### Links
+
+* https://blog.algolia.com/how-we-unit-test-react-components-using-expect-jsx/
 
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
