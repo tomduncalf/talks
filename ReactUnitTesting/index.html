@@ -78,7 +78,7 @@ class: center, middle
 
 --
 
-* Integration testing, end to end testing
+* vs. integration testing, end to end testing
 
 ???
 How small? ideally testing a small piece of code such as a (public) function with no depedencies on other parts of your code - library dependencies are ok
@@ -100,7 +100,7 @@ How small? ideally testing a small piece of code such as a (public) function wit
 
 --
 
-* Reduce dependency on end-to-end (automated/manual) tests
+* Reduce dependency on end-to-end (automated/manual) tests - faster, pinpoints failures
 
 --
 
@@ -170,10 +170,11 @@ $ mocha add.spec.js
 ### Testing Javascript: `mocha`
 
 ```
-const assert = require('assert')
-const add = require('./add')
-
 describe('add function', () => {
+    it('should add two numbers together correctly', () => {
+        assert(add(1, 2) === 3)
+    })
+
     it('should add three numbers together correctly', () => {
         assert(add(1, 2, 3) === 6)
     })
@@ -198,16 +199,24 @@ $ mocha add.spec.js
       -false
       +true
 
-      at Context.<anonymous> (1a-failures.js:11:9)
+      at Context.<anonymous> (add.spec.js:11:9)
 ```
 
 ---
 
 ### Testing Javascript: `chai`
 
+--
+
 * `chai` is an assertion library, which allows us to write our assertions in three ways:
 
 ```
+const add = require('./add')
+const chai = require('chai')
+chai.should()
+const expect = chai.expect
+const assert = chai.assert
+
 describe('add function', () => {
     it('should add two numbers together correctly', () => {
         // BDD "should" style
@@ -264,6 +273,33 @@ $ mocha add.spec.js
 
       at Context.<anonymous> (add.spec.js:8:33)
 ```
+
+---
+
+### Unit testing React apps
+
+* Why unit test React apps?
+
+--
+
+  * Check components render as expected
+
+--
+
+  * ...with different props/state
+
+--
+
+  * Check components can be interacted with as expected
+
+--
+
+  * Check component logic
+
+--
+
+  * Check other application logic e.g. Redux actions
+
 
 
 
