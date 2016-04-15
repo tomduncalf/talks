@@ -4,8 +4,6 @@
     <title>Title</title>
     <meta charset="utf-8">
     <style>
-      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
-
       body {
           font-family: 'Helvetica Neue', Arial, sans-serif;
           font-weight: 200;
@@ -29,7 +27,7 @@
       }
 
       .remark-code, .remark-inline-code {
-          font-family: 'Ubuntu Mono';
+          font-family: 'Consolas';
       }
 
       .remark-slide-number {
@@ -452,7 +450,7 @@ describe('HelloWorld component chai-enzyme', () => {
 
         // expect(wrapper.find('div')).to.have.length(1)
         expect(wrapper).to.have.exactly(1).descendants('div')
-        
+
         // expect(wrapper.contains('Hello world')).to.be.true
         expect(wrapper).to.contain('Hello world')
     })
@@ -466,8 +464,9 @@ describe('HelloWorld component chai-enzyme', () => {
 * https://blog.algolia.com/how-we-unit-test-react-components-using-expect-jsx/
 
     </textarea>
-    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
-    </script>
+    <!--script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script-->
+    <script src="lib/remark-latest.min.js"></script
+    >
     <script>
       var slideshow = remark.create({
         highlightLanguage: 'javascript',
