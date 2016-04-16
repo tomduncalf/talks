@@ -31,7 +31,7 @@
       }
 
       .remark-code {
-          font-size: 17px;
+          font-size: 16px;
       }
 
       .remark-slide-number {
@@ -714,8 +714,22 @@ describe('TodoItem', () => {
 })
 ```
 
+???
+haven't tested interaction yet - will come back to it
 ---
 
+### Testing: rendering TodoList
+
+* Test the `TodoList` component renders correctly - depends on `props`
+
+```html
+<ul>
+    { items.map((item, index) =>
+        <TodoItem item={item} onDone={onItemDone.bind(null, index)} />) }
+</ul>
+```
+
+---
 ### Links
 
 * https://blog.algolia.com/how-we-unit-test-react-components-using-expect-jsx/
