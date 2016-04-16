@@ -10,11 +10,13 @@ export default class TodoApp extends React.Component {
     }
 
     addItem(item) {
-        this.setState({ items: this.state.items.concat([item]) })
+        this.setState({ items: this.state.items.concat([{ item }]) })
     }
 
     removeItem(index) {
-        this.setState({ items: this.state.items.slice(0, index).concat(this.state.items.slice(index + 1)) })
+        const newItems = this.state.items.slice(0)
+        newItems[index].done = newItems[index].done ? false : true
+        this.setState({ items: newItems })
     }
 
     render() {
