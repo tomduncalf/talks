@@ -30,8 +30,17 @@
           font-family: 'Consolas';
       }
 
+      .remark-code {
+          font-size: 17px;
+      }
+
       .remark-slide-number {
           display: none;
+      }
+
+      .remark-code-span-highlighted {
+          background: none;
+          text-decoration: underline;
       }
     </style>
   </head>
@@ -471,9 +480,204 @@ describe('HelloWorld component chai-enzyme', () => {
 
 ---
 
-### Testing
+### Testing: setup
 
-* Test the app renders the correct components
+* npm `test` script to load Babel compiler and path for "absolute" includes
+
+```
+"scripts": {
+    "test": "NODE_PATH=src mocha --compilers js:babel-register " +
+    "--require ./test/helper.js 'src/**/*.spec.js*'"
+},
+```
+
+* Create a test helper file to load extensions and do any other initialisation
+
+```
+import chai from 'chai'
+import chaiEnzyme from 'chai-enzyme'
+chai.use(chaiEnzyme())
+```
+
+---
+
+### Testing: rendering TodoApp
+
+* Test the `TodoApp` component renders the correct components
+
+```html
+<div>
+    <TodoList items={this.state.items} onItemDone={this.removeItem.bind(this)} />
+    <TodoInput onAddItem={this.addItem.bind(this)} />
+</div>
+```
+
+--
+
+```
+// TodoApp.spec.jsx
+import { expect } from 'chai'
+import { shallow } from 'enzyme'
+import React from 'react'
+
+import TodoApp from './TodoApp'
+import TodoList from './TodoList'
+import TodoInput from './TodoInput'
+
+describe('TodoApp', () => {
+    it('should render correctly', () => {
+        const wrapper = shallow(<TodoApp />)
+
+        expect(wrapper).to.have.exactly(1).descendants(TodoList)
+        expect(wrapper).to.have.exactly(1).descendants(TodoInput)
+    })
+})
+```
+
+---
+
+### Testing: rendering TodoInput
+
+* Test the `TodoInput` component renders the correct elements
+
+```html
+<form onSubmit={this.addItem.bind(this)}>
+    Add item: <input type='text' ref='input' />
+    <button type='submit'>Add</button>
+</form>
+```
+
+--
+
+```
+// TodoInput.spec.jsx
+import TodoInput from './TodoInput'
+
+describe('TodoInput', () => {
+    it('should render correctly', () => {
+        const wrapper = shallow(<TodoInput />)
+
+        expect(wrapper).to.have.exactly(1).descendants('form')
+        expect(wrapper.find('form')).to.have.exactly(1).descendants('input')
+        expect(wrapper.find('form')).to.have.exactly(1).descendants('button')
+    })
+})
+```
+
+---
+
+### Testing: rendering TodoInput
+
+* Example error output if the `button` is missing:
+
+```bash
+1) TodoInput should render correctly:
+    AssertionError: expected the node in <TodoInput /> to have 1
+        descendants 'button' but actually found 0
+
+    HTML:
+
+    <form>Add item:
+      <input type="text" />
+    </form>
+```
+
+---
+
+### Testing: rendering TodoItem
+
+* Test the `TodoItem` component renders correctly - depends on `props`
+
+```html
+<li>
+    <span className={item.done ? 'done' : ''}>{item.item}</span>
+    &nbsp;<a href='#' onClick={onDone}>{ item.done ? 'Not done' : 'Done' }</a>
+</li>
+```
+
+--
+
+```
+import TodoItem from './TodoItem'
+
+describe('TodoItem', () => {
+    it('should render correctly', () => {
+        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+
+        expect(wrapper).to.have.exactly(1).descendants('li')
+
+        expect(wrapper).to.have.exactly(1).descendants('span')
+        expect(wrapper.find('span')).to.have.text('Test')
+
+        expect(wrapper).to.have.exactly(1).descendants('a')
+        expect(wrapper.find('a')).to.have.text('Done')
+    })
+})
+```
+
+---
+
+### Testing: rendering TodoItem
+
+* We can use test names to describe intended behaviour - "living documentation"
+
+```html
+<li>
+    <span className={item.done ? 'done' : ''}>{item.item}</span>
+    &nbsp;<a href='#' onClick={onDone}>{ item.done ? 'Not done' : 'Done' }</a>
+</li>
+```
+
+```
+import TodoItem from './TodoItem'
+
+describe('TodoItem', () => {
+    `it('should render the item as not done if "done" is not passed in', () => {`
+        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+
+        expect(wrapper).to.have.exactly(1).descendants('li')
+
+        expect(wrapper).to.have.exactly(1).descendants('span')
+        expect(wrapper.find('span')).to.have.text('Test')
+
+        expect(wrapper).to.have.exactly(1).descendants('a')
+        expect(wrapper.find('a')).to.have.text('Done')
+    })
+})
+```
+
+---
+
+### Testing: rendering TodoItem
+
+* Refactor out common code - easier to test various scenarios and update tests
+
+```
+describe('TodoItem', () => {
+    function assertItem(wrapper, text, linkText) {
+        expect(wrapper).to.have.exactly(1).descendants('li')
+        expect(wrapper).to.have.exactly(1).descendants('span')
+        expect(wrapper.find('span')).to.have.text(text)
+        expect(wrapper).to.have.exactly(1).descendants('a')
+        expect(wrapper.find('a')).to.have.text(linkText)
+    }
+
+    it('should render the item as not done if "done" is not passed in', () => {
+        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+        assertItem(wrapper, 'Test', 'Done')
+    })
+
+    it('should render the item as not done if "done" is false', () => {
+        const wrapper = shallow(<TodoItem item={{ item: 'Test', done: false }} />)
+        assertItem(wrapper, 'Test', 'Done')
+    })
+
+    it('should render the item as done if "done" is true', () => {
+        const wrapper = shallow(<TodoItem item={{ item: 'Test', done: true }} />)
+        assertItem(wrapper, 'Test', 'Not done')
+    })
+})
+```
 
 ---
 
