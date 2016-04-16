@@ -19,7 +19,8 @@ export default class TodoApp extends React.Component {
 
     render() {
         return <div>
-            <TodoList items={this.state.items} onItemDone={this.removeItem.bind(this)}/>
+            <TodoList items={this.state.items}
+                onItemDone={this.removeItem.bind(this)} />
             <TodoInput onAddItem={this.addItem.bind(this)} />
         </div>
     }
