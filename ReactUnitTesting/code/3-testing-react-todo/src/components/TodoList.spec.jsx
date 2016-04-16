@@ -16,9 +16,12 @@ describe('TodoList', () => {
     })
 
     it('should render items', () => {
-        const wrapper = getWrapper([{ item: 'item 1' }, { item: 'item 2', done: true }])
+        const items = [{ item: 'item 1' }, { item: 'item 2', done: true }]
+        const wrapper = getWrapper(items)
 
         expect(wrapper).to.have.exactly(1).descendants('ul')
         expect(wrapper.find('ul')).to.have.exactly(2).descendants(TodoItem)
+        expect(wrapper.find(TodoItem).at(0).prop('item')).to.deep.equal(items[0])
+        expect(wrapper.find(TodoItem).at(1).prop('item')).to.deep.equal(items[1])
     })
 })
