@@ -756,7 +756,7 @@ describe('TodoList', () => {
 
 ### Testing: interaction with `TodoItem`
 
-* Introducing `sinon` and `sinon-chai`
+* Introducing `sinon` and `sinon-chai` - we can use a `spy` to verify callback was called
 
 --
 
@@ -784,13 +784,75 @@ describe('TodoItem', () => {
 
 ### Testing: interaction with `TodoInput`
 
-* Couldn't get form to submit by clicking button :( - here is where end-to-end tests may be useful
+* We need to interact with the DOM - not suppoted with `shallow`, so we need to use `mount` ...
 
+--
+
+* ... which requires a DOM. Introducing: `jsdom`, a Javascript implementation of the DOM spec
+
+--
+
+* Add to `test/helper.js` (from [here](https://github.com/airbnb/enzyme/blob/master/docs/guides/jsdom.md)):
+
+```
+import { jsdom } from 'jsdom'
+
+var exposedProperties = ['window', 'navigator', 'document']
+
+global.document = jsdom('')
+global.window = document.defaultView
+Object.keys(document.defaultView).forEach((property) => {
+	if (typeof global[property] === 'undefined') {
+    	exposedProperties.push(property)
+    	global[property] = document.defaultView[property]
+    }
+})
+
+global.navigator = {
+    userAgent: 'node.js'
+}
+```
+
+---
+
+### Testing: interaction with `TodoInput`
+
+* We can now write a test that interacts with the DOM
+
+```
+addItem(e) {
+    e.preventDefault()
+    this.props.onAddItem(this.refs['input'].value)
+    this.refs['input'].value = ''
+}
+
+render() {
+    return <form onSubmit={this.addItem.bind(this)}>
+        Add item: <input type='text' ref='input' /> <button type='submit'>Add</button>
+    </form>
+}
+```
+
+```
+describe('submitting', () => {
+    it('should call the callback and clear the input on clicking the button', () => {
+        const onAddItem = spy()
+        const wrapper = mount(<TodoInput onAddItem={onAddItem} />)
+
+        wrapper.find('input').get(0).value = 'test'
+        wrapper.find('input').simulate('change')
+        wrapper.find('form').simulate('submit')
+
+        expect(onAddItem).to.have.been.calledWith('test')
+        expect(wrapper.find('input').get(0).value).to.equal('')
+    })
+})
+```
 ---
 
 ### Integration testing
 
-* Testing pyramid 
+* Testing pyramid
 
 ---
 
