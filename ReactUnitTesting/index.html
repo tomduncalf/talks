@@ -41,6 +41,12 @@
       .remark-code-span-highlighted {
           background: none;
           text-decoration: underline;
+          color: red;
+          font-weight: bold;
+      }
+
+      .remark-code-line-highlighted {
+          background-color: rgba(255, 0, 0, 0.6);
       }
     </style>
   </head>
@@ -438,6 +444,12 @@ describe('HelloWorld component', () => {
 
 ---
 
+### Shallow rendering
+
+TODO
+
+---
+
 ### Introducing: `chai-enzyme`
 
 ```
@@ -632,7 +644,7 @@ describe('TodoItem', () => {
 import TodoItem from './TodoItem'
 
 describe('TodoItem', () => {
-    `it('should render the item as not done if "done" is not passed in', () => {`
+*   it('should render the item as not done if "done" is not passed in', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
 
         expect(wrapper).to.have.exactly(1).descendants('li')
@@ -951,7 +963,7 @@ describe('marking items done (by calling callbacks and checking state)', () => {
 
 ### Testing: `TodoApp`
 
-* However, this depends on implementation details (c.f. unit testing private methods) - a better approach might be to "integration test" the component using `mount`
+* However, this depends on implementation details (like unit testing private methods) - a better approach might be to "integration test" the component using `mount`
 
 --
 
@@ -1017,6 +1029,32 @@ describe('marking items done (using mount)', () => {
 * Convert the application to use `Redux` instead of `state`:
 
 ```
+// index.jsx
+import * as React from 'react'
+*import * as ReactDOM from 'react-dom'
+*import { createStore } from 'redux'
+*import { Provider } from 'react-redux'
+
+import TodoApp from 'components/TodoApp'
+*import todos from 'redux/todos'
+
+*const store = createStore(todos)
+
+ReactDOM.render(
+*   <Provider store={store}>
+        <TodoApp />
+*   </Provider>,
+    document.querySelector('#app')
+)
+```
+
+---
+
+### Testing: `TodoApp` using `Redux`
+
+* Convert the application to use `Redux` instead of `state`:
+
+```
 // redux/todos.js
 export const ADD_TODO = 'ADD_TODO'
 export const TOGGLE_TODO_DONE = 'TOGGLE_TODO_DONE'
@@ -1049,31 +1087,110 @@ export const toggleTodoDone = (index) => ({ type: TOGGLE_TODO_DONE, index })
 
 ```
 import * as React from 'react'
-import { connect } from 'react-redux'
+*import { connect } from 'react-redux'
 
-import { addTodo, toggleTodoDone } from 'redux/todos'
+*import { addTodo, toggleTodoDone } from 'redux/todos'
 import TodoList from 'components/TodoList'
 import TodoInput from 'components/TodoInput'
 
-const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
+*const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
+    <div>
+        <TodoList items={`todos`} onItemDone={`toggleTodoDone`} />
+        <TodoInput onAddItem={`addTodo`} />
+    </div>
+)
+
+*const mapStateToProps = (state) => ({ todos: state.todos })
+
+*const mapDispatchToProps = (dispatch) => ({
+*   addTodo: (item) => dispatch(addTodo({ item })),
+*   toggleTodoDone: (index) => dispatch(toggleTodoDone(index))
+*})
+
+*export default connect(
+*   mapStateToProps,
+*   mapDispatchToProps
+*)(TodoApp)
+```
+
+---
+
+### Testing: `TodoApp` using `Redux`
+
+<img src="images/test-redux.png" style="width: 88%" />
+
+---
+
+### Testing: `TodoApp` using `Redux`
+
+* Presentational component tests still pass, but connected component doesn't
+
+```brainfuck
+Invariant Violation: Could not find "store" in either the context or props of
+"Connect(TodoApp)". Either wrap the root component in a <Provider>, or explicitly
+pass "store" as a prop to "Connect(TodoApp)".
+```
+
+--
+
+* `Redux`-connected components need a `store`, but the `store` is created at the top level (`index.jsx`) so isn't present when component is isolated
+
+---
+
+### Testing: `TodoApp` using `Redux`
+
+* First approach: export undecorated component and `shallow` test it separately
+
+```
+`export` const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
     <div>
         <TodoList items={todos} onItemDone={toggleTodoDone.bind(this)} />
         <TodoInput onAddItem={addTodo.bind(this)} />
     </div>
 )
 
-const mapStateToProps = (state) => ({ todos: state.todos })
-
-const mapDispatchToProps = (dispatch) => ({
-    addTodo: (item) => dispatch(addTodo({ item })),
-    toggleTodoDone: (index) => dispatch(toggleTodoDone(index))
-})
+// ...
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps
 )(TodoApp)
 ```
+
+---
+
+### Testing: `TodoApp` using `Redux`
+
+* First approach: export undecorated component and `shallow` test it separately
+
+```
+`export` const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
+    <div>
+        <TodoList items={todos} onItemDone={toggleTodoDone.bind(this)} />
+        <TodoInput onAddItem={addTodo.bind(this)} />
+    </div>
+)
+```
+
+```
+// TodoApp.spec.jsx
+// ...
+import { default as DecoratedTodoApp, TodoApp } from './TodoApp'
+// ...
+
+describe('TodoApp (un-decorated)', () => {
+    describe('rendering', () => {
+        it('should render correctly', () => {
+            const wrapper = shallow(<TodoApp />)
+
+            expect(wrapper).to.have.exactly(1).descendants(TodoList)
+            expect(wrapper).to.have.exactly(1).descendants(TodoInput)
+        })
+    })
+})
+```
+
+---
 
 ### Integration testing
 
@@ -1096,6 +1213,7 @@ export default connect(
     <script>
       var slideshow = remark.create({
         highlightLanguage: 'javascript',
+        highlightLines: true,
         highlightSpans: true,
         highlightStyle: 'sunburst'
       });

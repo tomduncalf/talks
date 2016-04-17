@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { shallow, mount } from 'enzyme'
 import React from 'react'
 
-import TodoApp from './TodoApp'
+import { default as DecoratedTodoApp, TodoApp } from './TodoApp'
 import TodoList from './TodoList'
 import TodoInput from './TodoInput'
 
@@ -21,7 +21,7 @@ function assertItems(wrapper, items) {
     })
 }
 
-describe('TodoApp', () => {
+describe('TodoApp (un-decorated)', () => {
     describe('rendering', () => {
         it('should render correctly', () => {
             const wrapper = shallow(<TodoApp />)
@@ -30,7 +30,9 @@ describe('TodoApp', () => {
             expect(wrapper).to.have.exactly(1).descendants(TodoInput)
         })
     })
+})
 
+describe('TodoApp (decorated)', () => {
     describe('adding items (using mount)', () => {
         it('should add items to a list', () => {
             const wrapper = mount(<TodoApp />)

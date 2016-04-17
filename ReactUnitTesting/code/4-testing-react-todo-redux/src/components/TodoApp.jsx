@@ -5,10 +5,10 @@ import { addTodo, toggleTodoDone } from 'redux/todos'
 import TodoList from 'components/TodoList'
 import TodoInput from 'components/TodoInput'
 
-const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
+export const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
     <div>
-        <TodoList items={todos} onItemDone={toggleTodoDone.bind(this)} />
-        <TodoInput onAddItem={addTodo.bind(this)} />
+        <TodoList items={todos} onItemDone={toggleTodoDone} />
+        <TodoInput onAddItem={addTodo} />
     </div>
 )
 
