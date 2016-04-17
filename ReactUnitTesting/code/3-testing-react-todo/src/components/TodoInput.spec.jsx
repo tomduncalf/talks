@@ -20,8 +20,9 @@ describe('TodoInput', () => {
 		it('should call the callback with the input value on clicking the button', () => {
 			const onAddItem = spy()
 			const wrapper = mount(<TodoInput onAddItem={onAddItem} />)
-			
-			wrapper.find('input').simulate('change', { target: { value: 'test' } })
+
+			wrapper.find('input').get(0).value = 'test'
+			wrapper.find('input').simulate('change')
 			wrapper.find('form').simulate('submit')
 
 			expect(onAddItem).to.have.been.calledWith('test')
