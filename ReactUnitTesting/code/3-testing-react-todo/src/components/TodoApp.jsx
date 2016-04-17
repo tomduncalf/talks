@@ -13,7 +13,7 @@ export default class TodoApp extends React.Component {
         this.setState({ items: this.state.items.concat([{ item }]) })
     }
 
-    removeItem(index) {
+    markItemDone(index) {
         const newItems = this.state.items.slice(0)
         newItems[index].done = newItems[index].done ? false : true
         this.setState({ items: newItems })
@@ -21,7 +21,7 @@ export default class TodoApp extends React.Component {
 
     render() {
         return <div>
-            <TodoList items={this.state.items} onItemDone={this.removeItem.bind(this)} />
+            <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
             <TodoInput onAddItem={this.addItem.bind(this)} />
         </div>
     }

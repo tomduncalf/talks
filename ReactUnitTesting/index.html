@@ -507,7 +507,7 @@ chai.use(chaiEnzyme())
 
 ```html
 <div>
-    <TodoList items={this.state.items} onItemDone={this.removeItem.bind(this)} />
+    <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
     <TodoInput onAddItem={this.addItem.bind(this)} />
 </div>
 ```
@@ -850,11 +850,123 @@ describe('submitting', () => {
 ```
 ---
 
+### Testing: `TodoApp`
+
+* We want to test that items are properly added and marked as done
+
+```
+addItem(item) {
+    this.setState({ items: this.state.items.concat([{ item }]) })
+}
+
+markItemDone(index) {
+    const newItems = this.state.items.slice(0)
+    newItems[index].done = newItems[index].done ? false : true
+    this.setState({ items: newItems })
+}
+
+render() {
+    return <div>
+        <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+        <TodoInput onAddItem={this.addItem.bind(this)} />
+    </div>
+}
+```
+
+---
+
+### Testing: `TodoApp`
+
+* One approach could be to test that the callbacks change the state:
+
+```
+describe('adding items (by calling callbacks and checking state)', () => {
+    it('should add an item to an empty list', () => {
+        const wrapper = shallow(<TodoApp />)
+        wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
+        expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
+    })
+})
+```
+
+---
+
+### Testing: `TodoApp`
+
+* One approach could be to test that the callbacks change the state:
+
+```
+describe('adding items (by calling callbacks and checking state)', () => {
+    it('should add an item to an empty list', () => {
+        const wrapper = shallow(<TodoApp />)
+        wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
+        expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
+    })
+
+    it('should add an item to a list with one item', () => {
+        const wrapper = shallow(<TodoApp />)
+        wrapper.setState({ items: [{ item: 'test 1' }] })
+        wrapper.find(TodoInput).at(0).prop('onAddItem')('test 2')
+        expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1' },
+            { item: 'test 2' }])
+    })
+})
+```
+
+---
+
+### Testing: `TodoApp`
+
+* One approach could be to test that the callbacks change the state:
+
+```
+describe('adding items (by calling callbacks and checking state)', () => {
+    it('should add an item to an empty list', () => {
+        const wrapper = shallow(<TodoApp />)
+        wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
+        expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
+    })
+
+    it('should add an item to a list with one item', () => {
+        const wrapper = shallow(<TodoApp />)
+        wrapper.setState({ items: [{ item: 'test 1' }] })
+        wrapper.find(TodoInput).at(0).prop('onAddItem')('test 2')
+        expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1' },
+            { item: 'test 2' }])
+    })
+})
+
+describe('marking items done (by calling callbacks and checking state)', () => {
+    it('should mark an item as done', () => {
+        const wrapper = shallow(<TodoApp />)
+        wrapper.setState({ items: [{ item: 'test 1' }, { item: 'test 2' }] })
+        wrapper.find(TodoList).at(0).prop('onItemDone')(0)
+        expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1', done: true },
+            { item: 'test 2' }])
+    })
+})
+```
+
+---
+
+### Testing: `TodoApp`
+
+* However, this depends on implementation details (c.f. unit testing private methods)
+
+--
+
+* A better approach might be to "integration test" the component using `mount`
+---
+
 ### Integration testing
 
 * Testing pyramid
 
 ---
+
+### Tips
+
+* `npm run test -- --grep "whatever"`
 
 ### Links
 

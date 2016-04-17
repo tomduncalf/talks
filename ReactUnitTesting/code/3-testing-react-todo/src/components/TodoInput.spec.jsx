@@ -1,9 +1,10 @@
 import { expect } from 'chai'
 import { shallow, mount } from 'enzyme'
 import { spy } from 'sinon'
-import React from 'react'
 
 import TodoInput from './TodoInput'
+
+import React from 'react'
 
 describe('TodoInput', () => {
 	describe('rendering', () => {
