@@ -31,30 +31,6 @@ describe('TodoApp', () => {
         })
     })
 
-    describe('adding items (by calling callbacks and checking state)', () => {
-        it('should add an item to an empty list', () => {
-            const wrapper = shallow(<TodoApp />)
-            wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
-            expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
-        })
-
-        it('should add an item to a list with one item', () => {
-            const wrapper = shallow(<TodoApp />)
-            wrapper.setState({ items: [{ item: 'test 1' }] })
-            wrapper.find(TodoInput).at(0).prop('onAddItem')('test 2')
-            expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1' }, { item: 'test 2' }])
-        })
-    })
-
-    describe('marking items done (by calling callbacks and checking state)', () => {
-        it('should mark an item as done', () => {
-            const wrapper = shallow(<TodoApp />)
-            wrapper.setState({ items: [{ item: 'test 1' }, { item: 'test 2' }] })
-            wrapper.find(TodoList).at(0).prop('onItemDone')(0)
-            expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1', done: true }, { item: 'test 2' }])
-        })
-    })
-
     describe('adding items (using mount)', () => {
         it('should add items to a list', () => {
             const wrapper = mount(<TodoApp />)

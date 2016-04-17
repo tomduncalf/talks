@@ -5,14 +5,12 @@ import { addTodo, toggleTodoDone } from 'redux/todos'
 import TodoList from 'components/TodoList'
 import TodoInput from 'components/TodoInput'
 
-export class TodoApp extends React.Component {
-    render() {
-        return <div>
-            <TodoList items={this.props.todos} onItemDone={this.props.toggleTodoDone.bind(this)} />
-            <TodoInput onAddItem={this.props.addTodo.bind(this)} />
-        </div>
-    }
-}
+const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
+    <div>
+        <TodoList items={todos} onItemDone={toggleTodoDone.bind(this)} />
+        <TodoInput onAddItem={addTodo.bind(this)} />
+    </div>
+)
 
 const mapStateToProps = (state) => ({ todos: state.todos })
 
