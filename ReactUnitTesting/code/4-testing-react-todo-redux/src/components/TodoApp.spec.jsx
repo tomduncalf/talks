@@ -1,10 +1,12 @@
 import { expect } from 'chai'
 import { shallow, mount } from 'enzyme'
 import React from 'react'
+import { createStore } from 'redux'
 
 import { default as DecoratedTodoApp, TodoApp } from './TodoApp'
 import TodoList from './TodoList'
 import TodoInput from './TodoInput'
+import { default as todosReducer } from 'redux/todos'
 
 function addItem(wrapper, item) {
     wrapper.find('input').get(0).value = item
@@ -32,10 +34,15 @@ describe('TodoApp (un-decorated)', () => {
     })
 })
 
+function getMounted() {
+    const context = { store: createStore(todosReducer) }
+    return mount(<DecoratedTodoApp />, { context })
+}
+
 describe('TodoApp (decorated)', () => {
     describe('adding items (using mount)', () => {
         it('should add items to a list', () => {
-            const wrapper = mount(<TodoApp />)
+            const wrapper = getMounted()
 
             addItem(wrapper, 'test 1')
             assertItems(wrapper, [{ item: 'test 1', done: false }])
@@ -47,7 +54,7 @@ describe('TodoApp (decorated)', () => {
 
     describe('marking items done (using mount)', () => {
         it('should mark an item as done', () => {
-            const wrapper = mount(<TodoApp />)
+            const wrapper = getMounted()
 
             addItem(wrapper, 'test 1')
             addItem(wrapper, 'test 2')

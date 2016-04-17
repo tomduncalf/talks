@@ -1192,6 +1192,42 @@ describe('TodoApp (un-decorated)', () => {
 
 ---
 
+### Testing: `TodoApp` using `Redux`
+
+* Second approach: create a `store` in the test and pass it through `context`
+
+```
+// TodoApp.spec.jsx
+import { createStore } from 'redux'
+import { default as todosReducer } from 'redux/todos'
+
+function getMounted() {
+    const context = { store: createStore(todosReducer) }
+    return mount(<DecoratedTodoApp />, { context })
+}
+```
+
+```
+describe('TodoApp (decorated)', () => {
+    describe('adding items (using mount)', () => {
+        it('should add items to a list', () => {
+            const wrapper = getMounted()
+
+            addItem(wrapper, 'test 1')
+            assertItems(wrapper, [{ item: 'test 1', done: false }])
+        })
+    })
+})
+```
+
+```
+// TodoApp.jsx
+export const TodoApp = ({ todos, addTodo, toggleTodoDone }) => // ...
+TodoApp.contextTypes = { store: React.PropTypes.object }
+```
+
+---
+
 ### Integration testing
 
 * Testing pyramid

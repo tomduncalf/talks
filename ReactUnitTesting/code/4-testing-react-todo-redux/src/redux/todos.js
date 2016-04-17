@@ -6,7 +6,6 @@ const initialState = { todos: [] }
 export default function reducer(state = initialState, action) {
     switch (action.type) {
         case ADD_TODO:
-            console.log(Object.assign({}, state, { todos: state.todos.concat([action.item]) }))
             return Object.assign({}, state, { todos: state.todos.concat([action.item]) })
         case TOGGLE_TODO_DONE:
             const newTodos = state.todos.slice(0)

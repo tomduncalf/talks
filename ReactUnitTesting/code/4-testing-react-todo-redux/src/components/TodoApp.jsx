@@ -12,6 +12,8 @@ export const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
     </div>
 )
 
+TodoApp.contextTypes = { store: React.PropTypes.object }
+
 const mapStateToProps = (state) => ({ todos: state.todos })
 
 const mapDispatchToProps = (dispatch) => ({
