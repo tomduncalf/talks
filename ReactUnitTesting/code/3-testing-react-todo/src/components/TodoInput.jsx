@@ -4,6 +4,7 @@ export default class TodoInput extends React.Component {
     addItem(e) {
         e.preventDefault()
         this.props.onAddItem(this.refs['input'].value)
+        console.log('additem', this.refs['input'].value)
         this.refs['input'].value = ''
     }
 

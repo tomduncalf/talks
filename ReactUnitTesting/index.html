@@ -753,6 +753,47 @@ describe('TodoList', () => {
 ```
 
 ---
+
+### Testing: interaction with `TodoItem`
+
+* Introducing `sinon` and `sinon-chai`
+
+--
+
+```
+describe('TodoItem', () => {
+    describe('rendering', () => {
+        // it('should render the item...
+    })
+
+    describe('clicking done', () => {
+        it('should call the onDone callback when clicking "Done"', () => {
+            const onDone = spy()
+            const wrapper = shallow(<TodoItem item={{ item: '1' }} onDone={onDone} />)
+
+            wrapper.find('a').simulate('click')
+
+            expect(onDone).to.have.been.calledOnce
+        })
+    })
+})
+
+```
+
+---
+
+### Testing: interaction with `TodoInput`
+
+* Couldn't get form to submit by clicking button :( - here is where end-to-end tests may be useful
+
+---
+
+### Integration testing
+
+* Testing pyramid 
+
+---
+
 ### Links
 
 * https://blog.algolia.com/how-we-unit-test-react-components-using-expect-jsx/

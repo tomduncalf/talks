@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { shallow } from 'enzyme'
+import { spy } from 'sinon'
 import React from 'react'
 
 import TodoItem from './TodoItem'
@@ -16,30 +17,43 @@ function assertItem(wrapper, text, done) {
 }
 
 describe('TodoItem', () => {
-    it('should render correctly (original)', () => {
-        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+    describe('rendering', () => {
+        it('should render correctly (original)', () => {
+            const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
 
-        expect(wrapper).to.have.exactly(1).descendants('li')
+            expect(wrapper).to.have.exactly(1).descendants('li')
 
-        expect(wrapper).to.have.exactly(1).descendants('span')
-        expect(wrapper.find('span')).to.have.text('Test')
+            expect(wrapper).to.have.exactly(1).descendants('span')
+            expect(wrapper.find('span')).to.have.text('Test')
 
-        expect(wrapper).to.have.exactly(1).descendants('a')
-        expect(wrapper.find('a')).to.have.text('Done')
+            expect(wrapper).to.have.exactly(1).descendants('a')
+            expect(wrapper.find('a')).to.have.text('Done')
+        })
+
+        it('should render the item as not done if "done" is not passed in', () => {
+            const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+            assertItem(wrapper, 'Test', false)
+        })
+
+        it('should render the item as not done if "done" is false', () => {
+            const wrapper = shallow(<TodoItem item={{ item: 'Test', done: false }} />)
+            assertItem(wrapper, 'Test', false)
+        })
+
+        it('should render the item as done if "done" is true', () => {
+            const wrapper = shallow(<TodoItem item={{ item: 'Test', done: true }} />)
+            assertItem(wrapper, 'Test', true)
+        })
     })
 
-    it('should render the item as not done if "done" is not passed in', () => {
-        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
-        assertItem(wrapper, 'Test', false)
-    })
+    describe('clicking done', () => {
+        it('should call the onDone callback when clicking "Done"', () => {
+            const onDone = spy()
+            const wrapper = shallow(<TodoItem item={{ item: '1' }} onDone={onDone} />)
 
-    it('should render the item as not done if "done" is false', () => {
-        const wrapper = shallow(<TodoItem item={{ item: 'Test', done: false }} />)
-        assertItem(wrapper, 'Test', false)
-    })
+            wrapper.find('a').simulate('click')
 
-    it('should render the item as done if "done" is true', () => {
-        const wrapper = shallow(<TodoItem item={{ item: 'Test', done: true }} />)
-        assertItem(wrapper, 'Test', true)
+            expect(onDone).to.have.been.calledOnce
+        })
     })
 })

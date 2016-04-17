@@ -24,6 +24,8 @@
     "jsx-chai": "3.0.0",
     "mocha": "2.4.5",
     "react-addons-test-utils": "0.14.7",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0",
     "webpack": "1.12.14",
     "webpack-dev-middleware": "1.5.1",
     "webpack-hot-middleware": "2.10.0"
