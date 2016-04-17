@@ -17,16 +17,5 @@ export default function reducer(state = initialState, action) {
     }
 }
 
-export function addTodo(item) {
-    return {
-        type: ADD_TODO,
-        item
-    }
-}
-
-export function toggleTodoDone(index) {
-    return {
-        type: TOGGLE_TODO_DONE,
-        index
-    }
-}
+export const addTodo = (item) => ({ type: ADD_TODO, item })
+export const toggleTodoDone = (index) => ({ type: TOGGLE_TODO_DONE, index })

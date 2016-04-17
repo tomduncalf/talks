@@ -1012,6 +1012,69 @@ describe('marking items done (using mount)', () => {
 
 ---
 
+### Testing: `TodoApp` using `Redux`
+
+* Convert the application to use `Redux` instead of `state`:
+
+```
+// redux/todos.js
+export const ADD_TODO = 'ADD_TODO'
+export const TOGGLE_TODO_DONE = 'TOGGLE_TODO_DONE'
+
+const initialState = { todos: [] }
+
+export default function reducer(state = initialState, action) {
+    switch (action.type) {
+        case ADD_TODO:
+            console.log(Object.assign({}, state, { todos: state.todos.concat([action.item]) }))
+            return Object.assign({}, state, { todos: state.todos.concat([action.item]) })
+        case TOGGLE_TODO_DONE:
+            const newTodos = state.todos.slice(0)
+            newTodos[action.index].done = newTodos[action.index].done ? false : true
+            return Object.assign({}, state, { todos: newTodos })
+        default:
+            return state
+    }
+}
+
+export const addTodo = (item) => ({ type: ADD_TODO, item })
+export const toggleTodoDone = (index) => ({ type: TOGGLE_TODO_DONE, index })
+```
+
+---
+
+### Testing: `TodoApp` using `Redux`
+
+* Convert the application to use `Redux` instead of `state`:
+
+```
+import * as React from 'react'
+import { connect } from 'react-redux'
+
+import { addTodo, toggleTodoDone } from 'redux/todos'
+import TodoList from 'components/TodoList'
+import TodoInput from 'components/TodoInput'
+
+export default ({ todos, addTodo, toggleTodoDone }) => {
+    <div>
+        <TodoList items={this.props.todos} onItemDone={this.props.toggleTodoDone.bind(this)} />
+        <TodoInput onAddItem={this.props.addTodo.bind(this)} />
+    </div>
+}
+
+const mapStateToProps = (state) => ({ todos: state.todos })
+
+const mapDispatchToProps = (dispatch) => ({
+    addTodo: (item) => dispatch(addTodo({ item })),
+    toggleTodoDone: (index) => dispatch(toggleTodoDone(index))
+})
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(TodoApp)
+```
+
 ### Integration testing
 
 * Testing pyramid

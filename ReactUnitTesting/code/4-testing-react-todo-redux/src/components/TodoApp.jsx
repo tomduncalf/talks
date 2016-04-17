@@ -14,18 +14,12 @@ export class TodoApp extends React.Component {
     }
 }
 
-const mapStateToProps = (state) => {
-    return {
-        todos: state.todos
-    }
-}
+const mapStateToProps = (state) => ({ todos: state.todos })
 
-const mapDispatchToProps = (dispatch) => {
-    return {
-        addTodo: (item) => dispatch(addTodo({ item })),
-        toggleTodoDone: (index) => dispatch(toggleTodoDone(index))
-    }
-}
+const mapDispatchToProps = (dispatch) => ({
+    addTodo: (item) => dispatch(addTodo({ item })),
+    toggleTodoDone: (index) => dispatch(toggleTodoDone(index))
+})
 
 export default connect(
     mapStateToProps,
