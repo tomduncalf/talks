@@ -158,14 +158,20 @@ module.exports = (a, b) => a + b
 
 ```
 // add.spec.js
-const assert = require('assert')
 const add = require('./add')
 
 describe('add function', () => {
     it('should add two numbers together correctly', () => {
-        assert(add(1, 2) === 3)
+        if (add(1, 2) !== 3) {
+            throw new Error('1 + 2 did not equal 3')
+        }
+
+        // or...
+        const assert = require('assert')
+        assert(add(1, 2) === 3, '1 + 2 did not equal 3')
     })
 })
+
 ```
 
 ```bash
@@ -185,11 +191,11 @@ $ mocha add.spec.js
 ```
 describe('add function', () => {
     it('should add two numbers together correctly', () => {
-        assert(add(1, 2) === 3)
+        assert(add(1, 2) === 3, '1 + 2 did not equal 3')
     })
 
     it('should add three numbers together correctly', () => {
-        assert(add(1, 2, 3) === 6)
+        assert(add(1, 2, 3) === 6, '1 + 2 + 3 did not equal 6')
     })
 })
 ```
@@ -206,13 +212,13 @@ $ mocha add.spec.js
 
   1) add function should add three numbers together correctly:
 
-      AssertionError: false == true
-      + expected - actual
+       AssertionError: 1 + 2 + 3 did not equal 6
+       + expected - actual
 
-      -false
-      +true
+       -false
+       +true
 
-      at Context.<anonymous> (add.spec.js:11:9)
+       at Context.<anonymous> (1a-failures.js:6:9)
 ```
 
 ---
@@ -444,12 +450,6 @@ describe('HelloWorld component', () => {
 
 ---
 
-### Shallow rendering
-
-TODO
-
----
-
 ### Introducing: `chai-enzyme`
 
 ```
@@ -509,6 +509,42 @@ describe('HelloWorld component chai-enzyme', () => {
 import chai from 'chai'
 import chaiEnzyme from 'chai-enzyme'
 chai.use(chaiEnzyme())
+```
+
+---
+
+### Testing: rendering TodoApp
+
+* Test the `TodoApp` component renders the correct components
+
+```html
+<div>
+    <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+    <TodoInput onAddItem={this.addItem.bind(this)} />
+</div>
+```
+--
+
+Rendered output:
+
+```html
+<div>
+    <ul></ul>
+    <form>
+        Add item: <input type="text"><button type="submit">Add</button>
+    </form>
+</div>
+```
+
+--
+
+Shallow rendered output:
+
+```html
+<div>
+    <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+    <TodoInput onAddItem={this.addItem.bind(this)} />
+</div>
 ```
 
 ---
