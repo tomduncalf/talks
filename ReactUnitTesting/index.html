@@ -39,10 +39,8 @@
       }
 
       .remark-code-span-highlighted {
-          background: none;
-          text-decoration: underline;
-          color: red;
-          font-weight: bold;
+          background: rgba(255, 0, 0, 0.6);;
+          color: white;
       }
 
       .remark-code-line-highlighted {
@@ -638,8 +636,8 @@ describe('TodoInput', () => {
 
 ```html
 <li>
-    <span className={item.done ? 'done' : ''}>{item.item}</span>
-    &nbsp;<a href='#' onClick={onDone}>{ item.done ? 'Not done' : 'Done' }</a>
+    <span className={item.done ? 'done' : ''}>{`this.props.item`.item}</span>
+    <a href='#' onClick={onDone}>{ `this.props.item`.done ? 'Not done' : 'Done' }</a>
 </li>
 ```
 
@@ -650,7 +648,7 @@ import TodoItem from './TodoItem'
 
 describe('TodoItem', () => {
     it('should render correctly', () => {
-        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+        const wrapper = shallow(<TodoItem `item={{ item: 'Test' }}` />)
 
         expect(wrapper).to.have.exactly(1).descendants('li')
 
@@ -671,8 +669,8 @@ describe('TodoItem', () => {
 
 ```html
 <li>
-    <span className={item.done ? 'done' : ''}>{item.item}</span>
-    &nbsp;<a href='#' onClick={onDone}>{ item.done ? 'Not done' : 'Done' }</a>
+    <span className={item.done ? 'done' : ''}>{this.props.item.item}</span>
+    <a href='#' onClick={onDone}>{ this.props.item.done ? 'Not done' : 'Done' }</a>
 </li>
 ```
 
@@ -701,10 +699,12 @@ describe('TodoItem', () => {
 * Refactor out common code - easier to test various scenarios and update tests
 
 ```
-function assertItem(wrapper, text, linkText) {
+*function assertItem(wrapper, text, linkText) {
     expect(wrapper).to.have.exactly(1).descendants('li')
+
     expect(wrapper).to.have.exactly(1).descendants('span')
     expect(wrapper.find('span')).to.have.text(text)
+
     expect(wrapper).to.have.exactly(1).descendants('a')
     expect(wrapper.find('a')).to.have.text(linkText)
 }
@@ -712,17 +712,17 @@ function assertItem(wrapper, text, linkText) {
 describe('TodoItem', () => {
     it('should render the item as not done if "done" is not passed in', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
-        assertItem(wrapper, 'Test', 'Done')
+*       assertItem(wrapper, 'Test', 'Done')
     })
 
     it('should render the item as not done if "done" is false', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test', done: false }} />)
-        assertItem(wrapper, 'Test', 'Done')
+*       assertItem(wrapper, 'Test', 'Done')
     })
 
     it('should render the item as done if "done" is true', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test', done: true }} />)
-        assertItem(wrapper, 'Test', 'Not done')
+*       assertItem(wrapper, 'Test', 'Not done')
     })
 })
 ```
@@ -737,27 +737,31 @@ But avoid replicating business logic in tests - keep it quite dumb!
 * We can test CSS classes are output correctly too
 
 ```
-function assertItem(wrapper, text, done) {
+function assertItem(wrapper, text, `done`) {
     expect(wrapper).to.have.exactly(1).descendants('li')
 
     expect(wrapper).to.have.exactly(1).descendants('span')
     expect(wrapper.find('span')).to.have.text(text)
-    expect(wrapper.find('span')).to.have.className(done ? 'done' : '')
+*   expect(wrapper.find('span')).to.have.className(done ? 'done' : '')
 
     expect(wrapper).to.have.exactly(1).descendants('a')
-    expect(wrapper.find('a')).to.have.text(done ? 'Not done' : 'Done')
+*   expect(wrapper.find('a')).to.have.text(done ? 'Not done' : 'Done')
 }
 
 describe('TodoItem', () => {
-    // ...
+    it('should render the item as not done if "done" is not passed in', () => {
+        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+        assertItem(wrapper, 'Test', `true`)
+    })
+
     it('should render the item as not done if "done" is false', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test', done: false }} />)
-        assertItem(wrapper, 'Test', true)
+        assertItem(wrapper, 'Test', `true`)
     })
 
     it('should render the item as done if "done" is true', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test', done: true }} />)
-        assertItem(wrapper, 'Test', false)
+        assertItem(wrapper, 'Test', `false`)
     })
 })
 ```
@@ -768,17 +772,20 @@ haven't tested interaction yet - will come back to it
 
 ### Testing: rendering TodoList
 
-* Test the `TodoList` component renders correctly - depends on `props`
+* Test the `TodoList` component renders correctly - depends on `props`, callback
 
 ```html
 <ul>
-    { items.map((item, index) =>
+    { this.props.items.map((item, index) =>
         <TodoItem key={index} item={item} onDone={onItemDone.bind(null, index)} />) }
 </ul>
 ```
 
+--
+
 ```
-const getWrapper = (items) => shallow(<TodoList items={items} onItemDone={() => {}} />)
+const getWrapper = (items) =>
+    shallow(<TodoList items={items} `onItemDone={() => {}}` />)
 
 describe('TodoList', () => {
     it('should render no items for an empty list', () => {
