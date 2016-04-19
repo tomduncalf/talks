@@ -160,16 +160,7 @@ describe('add function', () => {
 
 ```
 
-```bash
-$ npm install -g mocha
-$ mocha add.spec.js
-
-  add function
-    [✓] should add two numbers together correctly
-
-  [1 passing] (7ms)
-```
-
+<img src="images/add-output.png" width="60%" />
 ---
 
 ### Testing Javascript: `mocha`
@@ -186,26 +177,7 @@ describe('add function', () => {
 })
 ```
 
-```bash
-$ mocha add.spec.js
-
-  add function
-    ✓ should add two numbers together correctly
-    1) should add three numbers together correctly
-
-  1 passing (9ms)
-  1 failing
-
-  1) add function should add three numbers together correctly:
-
-       AssertionError: 1 + 2 + 3 did not equal 6
-       + expected - actual
-
-       -false
-       +true
-
-       at Context.<anonymous> (1a-failures.js:6:9)
-```
+<img src="images/add-failure-output.png" width="70%" />
 
 ---
 
@@ -259,25 +231,7 @@ it('should add three numbers together correctly', () => {
 })
 ```
 
-```bash
-$ mocha add.spec.js
-
-  add function
-    1) should add three numbers together correctly
-
-  0 passing (9ms)
-  1 failing
-
-  1) add function should add three numbers together correctly:
-
-      AssertionError: expected 3 to equal 6
-      + expected - actual
-
-      -3
-      +6
-
-      at Context.<anonymous> (add.spec.js:8:33)
-```
+<img src="images/chai-failure.png" width="70%" />
 
 ---
 
@@ -319,7 +273,7 @@ $ mocha add.spec.js
 
 ### Basic approach
 
-* Simple `Hello World` component
+* Simple `Hello World` component, tested with `react-addons-test-utils`
 
 ```
 // HelloWorld.js
@@ -348,7 +302,9 @@ describe('HelloWorld component', () => {
         // returns: { type: 'div', props: { children: 'Hello world' }, ...}
 
         expect(actual.type).to.equal('div')
-        expect(actual.props).`to.deep.equal`({ children: 'Hello world' })
+        expect(actual.props).to.deep.equal({ children: 'Hello world' })
+
+        // In reality we might use e.g. scryRenderedDOMComponentsWithTag
     })
 })
 ```
@@ -362,6 +318,13 @@ Object diffs quite hard to read
 ### Improvement: `jsx-chai`
 
 * https://github.com/bkonkle/jsx-chai, based on [expect-jsx](https://blog.algolia.com/how-we-unit-test-react-components-using-expect-jsx/)
+
+```
+// HelloWorld.js
+import React from 'react'
+
+export default () => <div>Hello world</div>
+```
 
 ```
 import chai, { expect } from 'chai'
@@ -408,6 +371,15 @@ Quite brittle
 
 ### `enzyme`
 
+* We can use the `shallow` function to return a `ReactWrapper`, which provides an API for working with and making assertions about the component's output
+
+```
+// HelloWorld.js
+import React from 'react'
+
+export default () => <div>Hello world</div>
+```
+
 ```
 import { expect } from 'chai'
 import { shallow } from 'enzyme'
@@ -417,9 +389,10 @@ import HelloWorld from './HelloWorld'
 
 describe('HelloWorld component', () => {
     it('should render correctly', () => {
-*       const wrapper = shallow(<HelloWorld />)
+        // wrapper is a ReactWrapper
+        const wrapper = shallow(<HelloWorld />)
 
-*       expect(wrapper.equals(<div>Hello world</div>)).to.be.true
+        expect(wrapper.equals(<div>Hello world</div>)).to.be.true
     })
 })
 ```
@@ -427,6 +400,15 @@ describe('HelloWorld component', () => {
 ---
 
 ### `enzyme`
+
+* `ReactWrapper` has methods to help us to test just the relevant parts of the output
+
+```
+// HelloWorld.js
+import React from 'react'
+
+export default () => <div>Hello world</div>
+```
 
 ```
 import { expect } from 'chai'
@@ -446,9 +428,15 @@ describe('HelloWorld component', () => {
 })
 ```
 
+--
+
+* Lots of methods! <span style='font-size:60%'>`.find(selector), .findWhere(predicate), .filter(selector), .filterWhere(predicate), .contains(nodeOrNodes), .equals(node), .hasClass(className), .is(selector), .not(selector), .children(), .childAt(index), .parents(), .parent(), .closest(selector), .shallow([options]), .render(), .unmount(), .text(), .html(), .get(index), .at(index), .first(), .last(), .state([key]), .context([key]), .props(), .prop(key), .key(), .simulate(event[, data]), .setState(nextState), .setProps(nextProps)...`</span>
+
 ---
 
 ### `chai-enzyme`
+
+* An extension for `chai`, allowing to to write assertions for Enzyme component in a more readable way
 
 ```
 import chai, { expect } from 'chai'
@@ -464,13 +452,13 @@ describe('HelloWorld component chai-enzyme', () => {
     it('should render correctly', () => {
         const wrapper = shallow(<HelloWorld />)
 
-        // expect(wrapper.equals(<div>Hello world</div>)).to.be.true
+        // was: expect(wrapper.equals(<div>Hello world</div>)).to.be.true
         expect(wrapper).to.have.html('<div>Hello world</div>')
 
-        // expect(wrapper.find('div')).to.have.length(1)
+        // was: expect(wrapper.find('div')).to.have.length(1)
         expect(wrapper).to.have.exactly(1).descendants('div')
 
-        // expect(wrapper.contains('Hello world')).to.be.true
+        // was: expect(wrapper.contains('Hello world')).to.be.true
         expect(wrapper).to.contain('Hello world')
     })
 })
@@ -510,7 +498,7 @@ export default class TodoApp extends React.Component {
         this.setState({ items: this.state.items.concat([{ item }]) })
     }
 
-    markItemDone(index) {
+    toggleItemDone(index) {
         const newItems = this.state.items.slice(0)
         newItems[index].done = newItems[index].done ? false : true
         this.setState({ items: newItems })
@@ -518,7 +506,9 @@ export default class TodoApp extends React.Component {
 
     render() {
         return <div>
-            <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+            <TodoList items={this.state.items}
+                onItemDone={this.toggleItemDone.bind(this)} />
+
             <TodoInput onAddItem={this.addItem.bind(this)} />
         </div>
     }
@@ -595,7 +585,7 @@ chai.use(chaiEnzyme())
 
 --
 
-* `package.json` `test` script to load Babel compiler, set path for "absolute" includes and execute all `*.spec.js*` files in `src`
+* Add `test` script to `paackage.json` to require test helper, load Babel compiler, set path for "absolute" includes and then execute all `*.spec.js*` files in `src`
 
 ```
 "scripts": {
@@ -606,7 +596,11 @@ chai.use(chaiEnzyme())
 
 --
 
-* Test files live alongside components
+* Tests can be run with `npm run test` (or `npm run test -- --grep 'filter'`)
+
+--
+
+* Keep test files alongside components rather than in their own directory
 
 ```
 ➜  components git:(master) ls
@@ -614,19 +608,19 @@ TodoApp.jsx        TodoInput.jsx      TodoItem.jsx       TodoList.jsx
 TodoApp.spec.jsx   TodoInput.spec.jsx TodoItem.spec.jsx  TodoList.spec.jsx
 ```
 
-* Tests can be run with `npm run test`
-  * (or `npm run test -- --grep 'whatever'`)
 ---
 
 ### Testing: rendering TodoApp
 
-* We can "shallow render" components to help with testing
+* We can "shallow render" components to isolate components for unit testing
 
 ```html
-<div>
-    <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
-    <TodoInput onAddItem={this.addItem.bind(this)} />
-</div>
+render() {
+    return <div>
+        <TodoList items={this.state.items} onItemDone={this.toggleItemDone.bind(this)} />
+        <TodoInput onAddItem={this.addItem.bind(this)} />
+    </div>
+}
 ```
 --
 
@@ -647,7 +641,7 @@ Shallow rendered output - isolates component by only rendering one layer deep:
 
 ```html
 <div>
-    <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+    <TodoList items={this.state.items} onItemDone={this.toggleItemDone.bind(this)} />
     <TodoInput onAddItem={this.addItem.bind(this)} />
 </div>
 ```
@@ -660,7 +654,7 @@ Shallow rendered output - isolates component by only rendering one layer deep:
 
 ```html
 <div>
-    <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+    <TodoList items={this.state.items} onItemDone={this.toggleItemDone.bind(this)} />
     <TodoInput onAddItem={this.addItem.bind(this)} />
 </div>
 ```
@@ -691,7 +685,7 @@ describe('TodoApp', () => {
 
 ### Testing: rendering TodoInput
 
-* Test the `TodoInput` component renders the correct elements
+* Test the `TodoInput` component renders the correct HTML elements
 
 ```html
 <form onSubmit={this.addItem.bind(this)}>
@@ -710,7 +704,9 @@ describe('TodoInput', () => {
     it('should render correctly', () => {
         const wrapper = shallow(<TodoInput />)
 
+        // Note HTML tag names go in quotes
         expect(wrapper).to.have.exactly(1).descendants('form')
+        // We can use .find to select children and make assertions about them
         expect(wrapper.find('form')).to.have.exactly(1).descendants('input')
         expect(wrapper.find('form')).to.have.exactly(1).descendants('button')
     })
@@ -719,7 +715,7 @@ describe('TodoInput', () => {
 
 ---
 
-### Testing: rendering TodoInput
+### Testing: rendering TodoInput - error output
 
 * Example error output if the `button` is missing:
 
@@ -741,17 +737,9 @@ describe('TodoInput', () => {
 })
 ```
 
-```bash
-1) TodoInput should render correctly:
-    AssertionError: expected the node in <TodoInput /> to have 1
-        descendants 'button' but actually found 0
+--
 
-    HTML:
-
-    <form>Add item:
-      <input type="text" />
-    </form>
-```
+<img src="images/todoinput-failure.png" width="90%" />
 
 ---
 
@@ -1042,7 +1030,7 @@ addItem(item) {
     this.setState({ items: this.state.items.concat([{ item }]) })
 }
 
-markItemDone(index) {
+toggleItemDone(index) {
     const newItems = this.state.items.slice(0)
     newItems[index].done = newItems[index].done ? false : true
     this.setState({ items: newItems })
@@ -1050,7 +1038,7 @@ markItemDone(index) {
 
 render() {
     return <div>
-        <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+        <TodoList items={this.state.items} onItemDone={this.toggleItemDone.bind(this)} />
         <TodoInput onAddItem={this.addItem.bind(this)} />
     </div>
 }
@@ -1138,7 +1126,7 @@ describe('marking items done (by calling callbacks and checking state)', () => {
 
 ---
 
-### Testing: `TodoApp`
+### Integration testing: `TodoApp`
 
 * However, this depends on implementation details - a better approach might be to "integration test" the component, using `mount` to fully render and interact with it
 
@@ -1164,7 +1152,7 @@ describe('adding items (using mount)', () => {
 
 ---
 
-### Testing: `TodoApp`
+### Integration testing: `TodoApp`
 
 * However, this depends on implementation details - a better approach might be to "integration test" the component, using `mount` to fully render and interact with it
 
@@ -1200,7 +1188,7 @@ function assertItems(wrapper, items) {
 
 ---
 
-### Testing: `TodoApp`
+### Integration testing: `TodoApp`
 
 * We can test marking items as done in the same way:
 
@@ -1229,7 +1217,7 @@ describe('marking items done (using mount)', () => {
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 --
 
@@ -1257,7 +1245,7 @@ ReactDOM.render(
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 * Convert the application to use `Redux` instead of `state`:
 
@@ -1292,7 +1280,7 @@ export const toggleTodoDone = (index) => ({ type: TOGGLE_TODO_DONE, index })
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 * Convert the application to use `Redux` instead of `state`:
 
@@ -1326,13 +1314,13 @@ import TodoInput from 'components/TodoInput'
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 <img src="images/test-redux.png" style="width: 88%" />
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 * Presentational component tests still pass, but connected component doesn't
 
@@ -1348,7 +1336,7 @@ pass "store" as a prop to "Connect(TodoApp)".
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 * First approach: export undecorated component and `shallow` test it separately
 
@@ -1371,7 +1359,7 @@ export default connect(
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 * First approach: export undecorated component and `shallow` test it separately
 
@@ -1394,7 +1382,7 @@ export default connect(
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 * First approach: export undecorated component and `shallow` test it separately
 
@@ -1425,7 +1413,7 @@ describe('TodoApp (un-decorated)', () => {
 
 ---
 
-### Testing: `TodoApp` using `Redux`
+### Integration testing: `TodoApp` using `Redux`
 
 * Second approach: create a `store` in the test and pass it through `context`
 * Allows us to test end-to-end, either entire app or a sub-tree of components
@@ -1466,7 +1454,7 @@ describe('TodoApp (decorated)', () => {
 
 ---
 
-### Testing: `TodoApp` with Redux
+### Integration testing: `TodoApp` with Redux
 
 * We can also return the store and manipulate it during the test to create "hybrid" end-to-end tests which interact with UI or store directly as appropriate
   * e.g. inject data into initial state rather than creating through UI, use fixtures to skip to a certain point in a flow
@@ -1503,7 +1491,7 @@ describe('TodoApp (Redux integration)', () => {
 
 ---
 
-### Testing: "Hybrid" integration testing with Redux
+### Example: "Hybrid" integration testing with Redux
 
 * Quicker and easier to write than full E2E tests, can ignore unimportant UI details
 * Can use mocks/spies where appropriate e.g. mock API calls, local storage, etc.
@@ -1541,7 +1529,7 @@ describe('integration', () => {
 ```
 ---
 
-### Testing: "Hybrid" integration testing with Redux
+### Example: "Hybrid" integration testing with Redux
 
 * Quicker and easier to write than full E2E tests, can ignore unimportant UI details
 * Can use mocks/spies where appropriate e.g. mock API calls, local storage, etc.
@@ -1578,7 +1566,7 @@ describe('goto next step', () => {
 
 ### Tips for real world usage
 
-* Work out the right balance of unit vs. integration vs. E2E tests and what it makes sense to test at each layer (and don't be too religious about "unit" isolation)
+* Work out the right balance of unit vs. integration vs. E2E tests and what it makes sense to test at each layer (and don't worry too much about total "unit" isolation)
 
 --
 
@@ -1606,7 +1594,7 @@ function encryptStuff(data, encryptFn = encrypt) {
 
 --
 
-* Make use of libraries for more complicated tests e.g. <a href="https://www.npmjs.com/package/fetch-mock">fetch-mock</a>, <a href="https://github.com/vesln/timekeeper">timekeeper</a>
+* Useful libraries: <a href="https://github.com/domenic/chai-as-promised">chai-as-promised</a>, <a href="https://github.com/mguterl/chai-datetime">chai-datetime</a>, <a href="https://www.npmjs.com/package/fetch-mock">fetch-mock</a>, <a href="https://github.com/vesln/timekeeper">timekeeper</a>
 
 ---
 

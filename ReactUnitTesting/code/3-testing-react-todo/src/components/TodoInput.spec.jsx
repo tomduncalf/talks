@@ -17,7 +17,7 @@ describe('TodoInput', () => {
 	    })
 	})
 
-	describe('submitting', () => {
+	/*describe('submitting', () => {
 		it('should call the callback and clear the input on clicking the button', () => {
 			const onAddItem = spy()
 			const wrapper = mount(<TodoInput onAddItem={onAddItem} />)
@@ -29,5 +29,5 @@ describe('TodoInput', () => {
 			expect(onAddItem).to.have.been.calledWith('test')
 			expect(wrapper.find('input').get(0).value).to.equal('')
 		})
-	})
+	})*/
 })
