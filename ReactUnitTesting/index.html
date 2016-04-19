@@ -405,7 +405,7 @@ Quite brittle
 
 ---
 
-### Introducing: `enzyme`
+### `enzyme`
 
 * https://github.com/airbnb/enzyme
 
@@ -417,7 +417,7 @@ Quite brittle
 
 ---
 
-### Introducing: `enzyme`
+### `enzyme`
 
 ```
 import { expect } from 'chai'
@@ -437,7 +437,7 @@ describe('HelloWorld component', () => {
 
 ---
 
-### Introducing: `enzyme`
+### `enzyme`
 
 ```
 import { expect } from 'chai'
@@ -459,7 +459,7 @@ describe('HelloWorld component', () => {
 
 ---
 
-### Introducing: `chai-enzyme`
+### `chai-enzyme`
 
 ```
 import chai, { expect } from 'chai'
@@ -979,7 +979,7 @@ describe('TodoItem', () => {
 
 --
 
-* ... which requires a DOM. Introducing: `jsdom`, a JS implementation of the DOM
+* ... which requires a DOM. We can use `jsdom`, a JS implementation of the DOM spec, rather than having to use a real browser.
 
 --
 
@@ -1074,6 +1074,7 @@ render() {
 describe('adding items (by calling callbacks and checking state)', () => {
     it('should add an item to an empty list', () => {
         const wrapper = shallow(<TodoApp />)
+
         wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
         expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
     })
@@ -1090,6 +1091,7 @@ describe('adding items (by calling callbacks and checking state)', () => {
 describe('adding items (by calling callbacks and checking state)', () => {
     it('should add an item to an empty list', () => {
         const wrapper = shallow(<TodoApp />)
+
         wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
         expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
     })
@@ -1097,6 +1099,7 @@ describe('adding items (by calling callbacks and checking state)', () => {
     it('should add an item to a list with one item', () => {
         const wrapper = shallow(<TodoApp />)
         wrapper.setState({ items: [{ item: 'test 1' }] })
+
         wrapper.find(TodoInput).at(0).prop('onAddItem')('test 2')
         expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1' },
             { item: 'test 2' }])
@@ -1114,6 +1117,7 @@ describe('adding items (by calling callbacks and checking state)', () => {
 describe('adding items (by calling callbacks and checking state)', () => {
     it('should add an item to an empty list', () => {
         const wrapper = shallow(<TodoApp />)
+
         wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
         expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
     })
@@ -1121,6 +1125,7 @@ describe('adding items (by calling callbacks and checking state)', () => {
     it('should add an item to a list with one item', () => {
         const wrapper = shallow(<TodoApp />)
         wrapper.setState({ items: [{ item: 'test 1' }] })
+
         wrapper.find(TodoInput).at(0).prop('onAddItem')('test 2')
         expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1' },
             { item: 'test 2' }])
@@ -1131,6 +1136,7 @@ describe('marking items done (by calling callbacks and checking state)', () => {
     it('should mark an item as done', () => {
         const wrapper = shallow(<TodoApp />)
         wrapper.setState({ items: [{ item: 'test 1' }, { item: 'test 2' }] })
+
         wrapper.find(TodoList).at(0).prop('onItemDone')(0)
         expect(wrapper.state('items')).to.deep.equal([{ item: 'test 1', done: true },
             { item: 'test 2' }])
@@ -1142,11 +1148,48 @@ describe('marking items done (by calling callbacks and checking state)', () => {
 
 ### Testing: `TodoApp`
 
-* However, this depends on implementation details (c.f. unit testing private methods) - a better approach might be to "integration test" the component using `mount`
+* However, this depends on implementation details - a better approach might be to "integration test" the component, using `mount` to fully render and interact with it
 
 --
 
 ```
+describe('adding items (using mount)', () => {
+    it('should add items to a list', () => {
+        const wrapper = mount(<TodoApp />)
+
+        wrapper.find('input').get(0).value = 'test 1'
+        wrapper.find('input').simulate('change')
+        wrapper.find('form').simulate('submit')
+
+        expect(wrapper).to.have.exactly(items.length).descendants('li')
+
+        const itemLi = wrapper.find('li').at(0)
+        expect(itemLi).to.contain.text('test 1')
+        expect(itemLi).to.contain.text('Done')
+    })
+})
+```
+
+---
+
+### Testing: `TodoApp`
+
+* However, this depends on implementation details - a better approach might be to "integration test" the component, using `mount` to fully render and interact with it
+
+```
+describe('adding items (using mount)', () => {
+    it('should add items to a list', () => {
+        const wrapper = mount(<TodoApp />)
+
+        addItem(wrapper, 'test 1')
+        assertItems(wrapper, [{ item: 'test 1', done: false }])
+
+        addItem(wrapper, 'test 2')
+        assertItems(wrapper, [{ item: 'test 1', done: false },
+            { item: 'test 2', done: false }])
+    })
+})
+
 function addItem(wrapper, item) {
     wrapper.find('input').get(0).value = item
     wrapper.find('input').simulate('change')
@@ -1161,19 +1204,6 @@ function assertItems(wrapper, items) {
         expect(itemLi).to.contain.text(item.done ? 'Not done' : 'Done')
     })
 }
-
-describe('adding items (using mount)', () => {
-    it('should add items to a list', () => {
-        const wrapper = mount(<TodoApp />)
-
-        addItem(wrapper, 'test 1')
-        assertItems(wrapper, [{ item: 'test 1', done: false }])
-
-        addItem(wrapper, 'test 2')
-        assertItems(wrapper, [{ item: 'test 1', done: false },
-            { item: 'test 2', done: false }])
-    })
-})
 ```
 
 ---
@@ -1199,11 +1229,17 @@ describe('marking items done (using mount)', () => {
 
 --
 
-* Advantage: implementation can change - as long as output is the same, the test will still pass
+* Advantages vs. shallow rendering and modifying state:
+
+  * Implementation details can change - as long as the output is the same, the tests will still pass
+
+  * Verifies that everything is wired together correctly (without needing a browser)
 
 ---
 
 ### Testing: `TodoApp` using `Redux`
+
+--
 
 * Convert the application to use `Redux` instead of `state`:
 
@@ -1243,18 +1279,22 @@ const initialState = { todos: [] }
 export default function reducer(state = initialState, action) {
     switch (action.type) {
         case ADD_TODO:
-            console.log(Object.assign({}, state, { todos: state.todos.concat([action.item]) }))
-            return Object.assign({}, state, { todos: state.todos.concat([action.item]) })
+            return Object.assign({}, state,
+                { todos: state.todos.concat([action.item]) })
+
         case TOGGLE_TODO_DONE:
             const newTodos = state.todos.slice(0)
             newTodos[action.index].done = newTodos[action.index].done ? false : true
+
             return Object.assign({}, state, { todos: newTodos })
+
         default:
             return state
     }
 }
 
 export const addTodo = (item) => ({ type: ADD_TODO, item })
+
 export const toggleTodoDone = (index) => ({ type: TOGGLE_TODO_DONE, index })
 ```
 
@@ -1321,6 +1361,30 @@ pass "store" as a prop to "Connect(TodoApp)".
 * First approach: export undecorated component and `shallow` test it separately
 
 ```
+// TodoApp.jsx
+const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
+    <div>
+        <TodoList items={todos} onItemDone={toggleTodoDone.bind(this)} />
+        <TodoInput onAddItem={addTodo.bind(this)} />
+    </div>
+)
+
+// ...
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(TodoApp)
+```
+
+---
+
+### Testing: `TodoApp` using `Redux`
+
+* First approach: export undecorated component and `shallow` test it separately
+
+```
+// TodoApp.jsx
 `export` const TodoApp = ({ todos, addTodo, toggleTodoDone }) => (
     <div>
         <TodoList items={todos} onItemDone={toggleTodoDone.bind(this)} />
@@ -1353,9 +1417,7 @@ export default connect(
 
 ```
 // TodoApp.spec.jsx
-// ...
 import { default as DecoratedTodoApp, TodoApp } from './TodoApp'
-// ...
 
 describe('TodoApp (un-decorated)', () => {
     describe('rendering', () => {
@@ -1381,12 +1443,22 @@ import { createStore } from 'redux'
 import { default as todosReducer } from 'redux/todos'
 
 function getMounted() {
+    // In a real app, this might be your configureStore function instead
     const context = { store: createStore(todosReducer) }
     return mount(<DecoratedTodoApp />, { context })
 }
 ```
 
 ```
+// TodoApp.jsx
+export const TodoApp = ({ todos, addTodo, toggleTodoDone }) => // ...
+TodoApp.contextTypes = { store: React.PropTypes.object }
+```
+
+--
+
+```
+// TodoApp.spec.jsx
 describe('TodoApp (decorated)', () => {
     describe('adding items (using mount)', () => {
         it('should add items to a list', () => {
@@ -1399,12 +1471,6 @@ describe('TodoApp (decorated)', () => {
 })
 ```
 
-```
-// TodoApp.jsx
-export const TodoApp = ({ todos, addTodo, toggleTodoDone }) => // ...
-TodoApp.contextTypes = { store: React.PropTypes.object }
-```
-
 ---
 
 * Useful for testing actions, but also for "hybrid E2E" tests without having to interact with UI to set up content
@@ -1413,13 +1479,7 @@ TodoApp.contextTypes = { store: React.PropTypes.object }
 
 ---
 
-### Integration testing
-
-* Testing pyramid
-
----
-
-### Tips
+### Tips for scaling to real application
 
 * `npm run test -- --grep "whatever"`
 
