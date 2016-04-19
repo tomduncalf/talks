@@ -1,5 +1,5 @@
-Presentation for the London Functional Programming for the Web meet up on some functional programming fundementals, based on the e-book "Professor Frisby's Mostly Adequate Guide to Functional Programming" (https://github.com/MostlyAdequate/mostly-adequate-guide)
+Presentation for the London Functional Programming for the Web meetup on some functional programming fundementals, based on the e-book "Professor Frisby's Mostly Adequate Guide to Functional Programming" (https://github.com/MostlyAdequate/mostly-adequate-guide)
 
-To view: https://cdn.rawgit.com/tomduncalf/talks/master/FPFundementals/index.html
+* View the slides: http://bit.ly/FPFundementals 
 
-Dev URL: https://rawgit.com/tomduncalf/talks/master/FPFundementals/index.html
+* Watch the talk: http://bit.ly/FPFundementalsTalk
