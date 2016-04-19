@@ -66,38 +66,17 @@ class: center, middle
 
 ### Overview
 
-* What is unit testing?
-
 * Why unit test?
 
-* `mocha` and `chai`
+* `mocha` and `chai` for testing Javascript
 
 * Unit testing React components
 
-* `enzyme`
+* Shallow rendering and testing with `enzyme`
 
-* Common scenarios
+* Testing strategies for an app
 
----
-
-### What is unit testing?
-
-<blockquote>“Unit testing is a software development process in which the smallest testable parts of an application, called units, are individually and independently scrutinized for proper operation. Unit testing is often automated but it can also be done manually.”</quote>
-
---
-
-* Example: "`add(1, 1)` should equal `2`"
-
---
-
-* How small should a unit be?
-
---
-
-* vs. integration testing, end to end testing
-
-???
-How small? ideally testing a small piece of code such as a (public) function with no depedencies on other parts of your code - library dependencies are ok
+* Tips for real world usage
 
 ---
 
@@ -116,11 +95,11 @@ How small? ideally testing a small piece of code such as a (public) function wit
 
 --
 
-* Reduce dependency on end-to-end tests - faster, more accurate
+* Reduce dependency on end-to-end tests - faster, pinpoint failure better
 
 --
 
-* Acts as "executable documentation" for our code
+* Tests act as "executable documentation" for our code
 
 --
 
@@ -259,13 +238,13 @@ describe('add function', () => {
 
 --
 
-* We will use BDD `expect` style:
+* We will use BDD `expect` style, supports lots of assertions (and is extendable):
 
 ```
-expect(foo).to.be.a('string')
-expect(foo).to.equal('bar')
-expect(foo).to.have.length(3)
-expect(tea).to.have.property('flavors').with.length(3)
+expect(result).to.be.a('string')
+expect(result).to.have.length(3)
+expect(result).to.deep.equal({ name: 'Tom' })
+expect(result).to.have.property('addresses').with.length(3)
 ```
 
 ---
@@ -304,11 +283,11 @@ $ mocha add.spec.js
 
 ### Unit testing React apps
 
-* Why unit test React apps?
+* What might we want to test in a React app?
 
 --
 
-  * Check components render as expected
+  * Test components render as expected
 
 --
 
@@ -316,15 +295,23 @@ $ mocha add.spec.js
 
 --
 
-  * Check components can be interacted with as expected
+  * Test components can be interacted with as expected
 
 --
 
-  * Check component logic
+  * Test component logic
 
 --
 
-  * Check other application logic e.g. Redux actions
+  * Test component integration
+
+--
+
+  * Test user journeys
+
+--
+
+  * Test other application logic e.g. Redux actions
 
 
 
@@ -407,11 +394,13 @@ Quite brittle
 
 ### `enzyme`
 
-* https://github.com/airbnb/enzyme
+* Open source library from Github: https://github.com/airbnb/enzyme
 
-* Provides an API for easily asserting, mainpulating and traversing React components output
+* Provides an API for working with React component output in tests
 
-* Mimick's jQuery's API for DOM manipulation and traversal
+* Supports shallow rendering, manipulating `props` and `state`, etc.
+
+* Mimicks jQuery's API for DOM manipulation and traversal
 
 * Works with all major test runners and assertion libraries
 
