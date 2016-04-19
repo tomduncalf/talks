@@ -26,6 +26,10 @@
         font-weight: 300;
       }
 
+      h3 {
+          margin: 10px 0;
+      }
+
       .remark-code, .remark-inline-code {
           font-family: 'Consolas';
       }
@@ -53,7 +57,8 @@
 
 class: center, middle
 
-# Unit Testing<br/>React Applications
+# Unit Testing React Applications
+### with `Mocha`, `Chai` and `Enzyme`
 <br>
 <center><small>Tom Duncalf | <a href='mailto:tom@tomduncalf.com'>tom@tomduncalf.com</a> | <a href='https://twitter.com/tomduncalf'>@tomduncalf</a></small></center>
 
@@ -148,6 +153,10 @@ Document e.g. that a certain edge case handling is correct
 
 * We will use `mocha` as the core test framework and test runner
 
+
+---
+
+### Testing Javascript: `mocha`
 
 ```
 // add.js
@@ -332,6 +341,9 @@ import React from 'react'
 export default () => <div>Hello world</div>
 ```
 
+--
+
+
 ```
 // HelloWorld.spec.js
 import { expect } from 'chai'
@@ -346,9 +358,10 @@ describe('HelloWorld component', () => {
         renderer.render(<HelloWorld />)
 
         const actual = renderer.getRenderOutput()
+        // returns: { type: 'div', props: { children: 'Hello world' }, ...}
 
         expect(actual.type).to.equal('div')
-        expect(actual.props).to.deep.equal({ children: 'Hello world' })
+        expect(actual.props).`to.deep.equal`({ children: 'Hello world' })
     })
 })
 ```
@@ -380,7 +393,7 @@ describe('HelloWorld component', () => {
 
         const actual = renderer.getRenderOutput()
 
-        expect(actual).to.deep.equal(<div>Hello world</div>)
+*       expect(actual).to.deep.equal(<div>Hello world</div>)
     })
 })
 ```
@@ -415,9 +428,9 @@ import HelloWorld from './HelloWorld'
 
 describe('HelloWorld component', () => {
     it('should render correctly', () => {
-        const wrapper = shallow(<HelloWorld />)
+*       const wrapper = shallow(<HelloWorld />)
 
-        expect(wrapper.equals(<div>Hello world</div>)).to.be.true
+*       expect(wrapper.equals(<div>Hello world</div>)).to.be.true
     })
 })
 ```
@@ -438,10 +451,8 @@ describe('HelloWorld component', () => {
         const wrapper = shallow(<HelloWorld />)
 
         expect(wrapper.equals(<div>Hello world</div>)).to.be.true
-
-        expect(wrapper.find('<div/>')).to.have.length(1)
-
-        expect(wrapper.contains('Hello world')).to.be.true
+*       expect(wrapper.find('div')).to.have.length(1)
+*       expect(wrapper.contains('Hello world')).to.be.true
     })
 })
 ```
@@ -486,34 +497,141 @@ describe('HelloWorld component chai-enzyme', () => {
 
 ---
 
-### Code / Demo
+### Demo
+
+* http://127.0.0.1:3000
+
+---
+
+### Code: `TodoApp.jsx`
+
+```
+import * as React from 'react'
+
+import TodoList from 'components/TodoList'
+import TodoInput from 'components/TodoInput'
+
+export default class TodoApp extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = { items: [] }
+    }
+
+    addItem(item) {
+        this.setState({ items: this.state.items.concat([{ item }]) })
+    }
+
+    markItemDone(index) {
+        const newItems = this.state.items.slice(0)
+        newItems[index].done = newItems[index].done ? false : true
+        this.setState({ items: newItems })
+    }
+
+    render() {
+        return <div>
+            <TodoList items={this.state.items} onItemDone={this.markItemDone.bind(this)} />
+            <TodoInput onAddItem={this.addItem.bind(this)} />
+        </div>
+    }
+}
+```
+
+---
+
+### Code: `TodoList.jsx`
+
+```
+import * as React from 'react';
+
+import TodoItem from 'components/TodoItem'
+
+export default ({ items, onItemDone }) => (
+    <ul>
+        { items.map((item, index) =>
+            <TodoItem key={index} item={item} onDone={onItemDone.bind(null, index)} />)
+        }
+    </ul>
+)
+```
+
+### Code: `TodoItem.jsx`
+
+```
+import * as React from 'react';
+
+export default ({ item, onDone }) => (
+    <li>
+        <span className={item.done ? 'done' : ''}>{item.item}</span>
+        &nbsp;
+        <a href='#' onClick={onDone}>{ item.done ? 'Not done' : 'Done' }</a>
+    </li>
+)
+```
+
+---
+
+### Code: `TodoInput.jsx`
+
+```
+import * as React from 'react'
+
+export default class TodoInput extends React.Component {
+    addItem(e) {
+        e.preventDefault()
+        this.props.onAddItem(this.refs['input'].value)
+        this.refs['input'].value = ''
+    }
+
+    render() {
+        return <form onSubmit={this.addItem.bind(this)}>
+            Add item: <input type='text' ref='input' />
+            <button type='submit'>Add</button>
+        </form>
+    }
+}
+```
 
 ---
 
 ### Testing: setup
 
-* npm `test` script to load Babel compiler and path for "absolute" includes
-
-```
-"scripts": {
-    "test": "NODE_PATH=src mocha --compilers js:babel-register " +
-    "--require ./test/helper.js 'src/**/*.spec.js*'"
-},
-```
-
 * Create a test helper file to load extensions and do any other initialisation
 
 ```
+// test/helper.js
 import chai from 'chai'
 import chaiEnzyme from 'chai-enzyme'
 chai.use(chaiEnzyme())
 ```
 
+--
+
+* `package.json` `test` script to load Babel compiler, set path for "absolute" includes and execute all `*.spec.js*` files in `src`
+
+```
+"scripts": {
+    "test": "NODE_PATH=src mocha --compilers js:babel-register " +
+        "--require ./test/helper.js 'src/**/*.spec.js*'"
+},
+```
+
+--
+
+* Test files live alongside components
+
+```
+➜  components git:(master) ls
+TodoApp.jsx        TodoInput.jsx      TodoItem.jsx       TodoList.jsx
+TodoApp.spec.jsx   TodoInput.spec.jsx TodoItem.spec.jsx  TodoList.spec.jsx
+```
+
+* Tests can be run with `npm run test`
+  * (or `npm run test -- --grep 'whatever'`)
 ---
 
 ### Testing: rendering TodoApp
 
-* Test the `TodoApp` component renders the correct components
+* We can "shallow render" components to help with testing
 
 ```html
 <div>
@@ -536,7 +654,7 @@ Rendered output:
 
 --
 
-Shallow rendered output:
+Shallow rendered output - isolates component by only rendering one layer deep:
 
 ```html
 <div>
@@ -616,6 +734,24 @@ describe('TodoInput', () => {
 
 * Example error output if the `button` is missing:
 
+```html
+<form onSubmit={this.addItem.bind(this)}>
+    Add item: <input type='text' ref='input' />
+</form>
+```
+
+```
+describe('TodoInput', () => {
+    it('should render correctly', () => {
+        const wrapper = shallow(<TodoInput />)
+
+        expect(wrapper).to.have.exactly(1).descendants('form')
+        expect(wrapper.find('form')).to.have.exactly(1).descendants('input')
+        expect(wrapper.find('form')).to.have.exactly(1).descendants('button')
+    })
+})
+```
+
 ```bash
 1) TodoInput should render correctly:
     AssertionError: expected the node in <TodoInput /> to have 1
@@ -652,18 +788,18 @@ describe('TodoItem', () => {
 
         expect(wrapper).to.have.exactly(1).descendants('li')
 
-        expect(wrapper).to.have.exactly(1).descendants('span')
-        expect(wrapper.find('span')).to.have.text('Test')
+        expect(wrapper.find('li')).to.have.exactly(1).descendants('span')
+        expect(wrapper.find('li').find('span')).to.have.text('Test')
 
-        expect(wrapper).to.have.exactly(1).descendants('a')
-        expect(wrapper.find('a')).to.have.text('Done')
+        expect(wrapper.find('li')).to.have.exactly(1).descendants('a')
+        expect(wrapper.find('li').find('a')).to.have.text('Done')
     })
 })
 ```
 
 ---
 
-### Testing: rendering TodoItem
+### Testing: rendering TodoItem - naming tests
 
 * We can use test names to describe intended behaviour - "living documentation"
 
@@ -679,22 +815,22 @@ import TodoItem from './TodoItem'
 
 describe('TodoItem', () => {
 *   it('should render the item as not done if "done" is not passed in', () => {
-        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
+        const wrapper = shallow(<TodoItem `item={{ item: 'Test' }}` />)
 
         expect(wrapper).to.have.exactly(1).descendants('li')
 
-        expect(wrapper).to.have.exactly(1).descendants('span')
-        expect(wrapper.find('span')).to.have.text('Test')
+        expect(wrapper.find('li')).to.have.exactly(1).descendants('span')
+        expect(wrapper.find('li').find('span')).to.have.text('Test')
 
-        expect(wrapper).to.have.exactly(1).descendants('a')
-        expect(wrapper.find('a')).to.have.text('Done')
+        expect(wrapper.find('li')).to.have.exactly(1).descendants('a')
+        expect(wrapper.find('li').find('a')).to.have.text('Done')
     })
 })
 ```
 
 ---
 
-### Testing: rendering TodoItem
+### Testing: rendering TodoItem - multiple scenarios
 
 * Refactor out common code - easier to test various scenarios and update tests
 
@@ -702,11 +838,11 @@ describe('TodoItem', () => {
 *function assertItem(wrapper, text, linkText) {
     expect(wrapper).to.have.exactly(1).descendants('li')
 
-    expect(wrapper).to.have.exactly(1).descendants('span')
-    expect(wrapper.find('span')).to.have.text(text)
+    expect(wrapper.find('li')).to.have.exactly(1).descendants('span')
+    expect(wrapper.find('li').find('span')).to.have.text(text)
 
-    expect(wrapper).to.have.exactly(1).descendants('a')
-    expect(wrapper.find('a')).to.have.text(linkText)
+    expect(wrapper.find('li')).to.have.exactly(1).descendants('a')
+    expect(wrapper.find('li').find('a')).to.have.text(linkText)
 }
 
 describe('TodoItem', () => {
@@ -740,12 +876,12 @@ But avoid replicating business logic in tests - keep it quite dumb!
 function assertItem(wrapper, text, `done`) {
     expect(wrapper).to.have.exactly(1).descendants('li')
 
-    expect(wrapper).to.have.exactly(1).descendants('span')
-    expect(wrapper.find('span')).to.have.text(text)
-*   expect(wrapper.find('span')).to.have.className(done ? 'done' : '')
+    expect(wrapper.find('li')).to.have.exactly(1).descendants('span')
+    expect(wrapper.find('li').find('span')).to.have.text(text)
+*   expect(wrapper.find('li').find('span')).to.have.className(done ? 'done' : '')
 
-    expect(wrapper).to.have.exactly(1).descendants('a')
-*   expect(wrapper.find('a')).to.have.text(done ? 'Not done' : 'Done')
+    expect(wrapper.find('li')).to.have.exactly(1).descendants('a')
+*   expect(wrapper.find('li').find('a')).to.have.text(done ? 'Not done' : 'Done')
 }
 
 describe('TodoItem', () => {
@@ -811,7 +947,7 @@ describe('TodoList', () => {
 
 ### Testing: interaction with `TodoItem`
 
-* Introducing `sinon` and `sinon-chai` - we can use a `spy` to verify callback was called
+* Wtih `sinon` and `sinon-chai` we can use a `spy` to verify callback was called
 
 --
 
@@ -839,11 +975,11 @@ describe('TodoItem', () => {
 
 ### Testing: interaction with `TodoInput`
 
-* We need to interact with the DOM - not suppoted with `shallow`, so we need to use `mount` ...
+* We need to interact with the DOM - not supported with `shallow`, so we need to use `mount` ...
 
 --
 
-* ... which requires a DOM. Introducing: `jsdom`, a Javascript implementation of the DOM spec
+* ... which requires a DOM. Introducing: `jsdom`, a JS implementation of the DOM
 
 --
 
@@ -1006,7 +1142,7 @@ describe('marking items done (by calling callbacks and checking state)', () => {
 
 ### Testing: `TodoApp`
 
-* However, this depends on implementation details (like unit testing private methods) - a better approach might be to "integration test" the component using `mount`
+* However, this depends on implementation details (c.f. unit testing private methods) - a better approach might be to "integration test" the component using `mount`
 
 --
 

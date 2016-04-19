@@ -22,12 +22,13 @@ describe('TodoItem', () => {
             const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
 
             expect(wrapper).to.have.exactly(1).descendants('li')
+            const li = wrapper.find('li')
 
-            expect(wrapper).to.have.exactly(1).descendants('span')
-            expect(wrapper.find('span')).to.have.text('Test')
+            expect(li).to.have.exactly(1).descendants('span')
+            expect(li.find('span')).to.have.text('Test')
 
-            expect(wrapper).to.have.exactly(1).descendants('a')
-            expect(wrapper.find('a')).to.have.text('Done')
+            expect(li).to.have.exactly(1).descendants('a')
+            expect(li.find('a')).to.have.text('Done')
         })
 
         it('should render the item as not done if "done" is not passed in', () => {
