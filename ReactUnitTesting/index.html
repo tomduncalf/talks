@@ -737,10 +737,10 @@ describe('TodoInput', () => {
 * Test the `TodoItem` component renders correctly - depends on `props`
 
 ```html
-<li>
-    <span className={item.done ? 'done' : ''}>{`this.props.item`.item}</span>
-    <a href='#' onClick={onDone}>{ `this.props.item`.done ? 'Not done' : 'Done' }</a>
-</li>
+({ `item`, onDone }) => (<li>
+    <span className={`item`.done ? 'done' : ''}>{`item`.item}</span>
+    &nbsp;<a href='#' onClick={onDone}>{ `item`.done ? 'Not done' : 'Done' }</a>
+</li>)
 ```
 
 --
@@ -770,10 +770,10 @@ describe('TodoItem', () => {
 * Use test names to describe intended behaviour - "executable documentation"
 
 ```html
-<li>
-    <span className={item.done ? 'done' : ''}>{this.props.item.item}</span>
-    <a href='#' onClick={onDone}>{ this.props.item.done ? 'Not done' : 'Done' }</a>
-</li>
+({ item, onDone }) => (<li>
+    <span className={item.done ? 'done' : ''}>{item.item}</span>
+    &nbsp;<a href='#' onClick={onDone}>{ item.done ? 'Not done' : 'Done' }</a>
+</li>)
 ```
 
 ```
@@ -877,10 +877,10 @@ haven't tested interaction yet - will come back to it
 * Test the `TodoList` component renders correctly - depends on `props`, callback
 
 ```html
-<ul>
-    { this.props.items.map((item, index) =>
-        <TodoItem key={index} item={item} onDone={onItemDone.bind(null, index)} />) }
-</ul>
+({ `items`, `onItemDone` }) => (<ul>
+    { `items`.map((item, index) =>
+        <TodoItem key={index} item={item} onDone={`onItemDone.bind`(null, index)} />) }
+</ul>)
 ```
 
 --
@@ -915,10 +915,10 @@ describe('TodoList', () => {
 ### Testing: interaction with `TodoItem`
 
 ```html
-<li>
-    <span className={item.done ? 'done' : ''}>{this.props.item.item}</span>
-    <a href='#' `onClick={onDone}`>{ this.props.item.done ? 'Not done' : 'Done' }</a>
-</li>
+({ item, `onDone` }) => (<li>
+    <span className={item.done ? 'done' : ''}>{item.item}</span>
+    &nbsp;<a href='#' `onClick={onDone}`>{ item.done ? 'Not done' : 'Done' }</a>
+</li>)
 ```
 
 --
@@ -938,12 +938,12 @@ describe('TodoItem', () => {
 
     describe('clicking done', () => {
         it('should call the onDone callback when clicking "Done"', () => {
-            `const onDone = spy()`
-            const wrapper = shallow(<TodoItem item={{ item: '1' }} `onDone={onDone}` />)
+            `const onDoneSpy = spy()`
+            const wrapper = shallow(<TodoItem `onDone={onDoneSpy}` item={{ item: '1' }} />)
 
             wrapper.find('a').`simulate('click')`
 
-            `expect(onDone).to.have.been.calledOnce`
+            `expect(onDoneSpy).to.have.been.calledOnce`
         })
     })
 })
@@ -959,8 +959,8 @@ describe('TodoItem', () => {
 ```
 addItem(e) {
     e.preventDefault()
-    this.props.onAddItem(this.refs['input'].value)
-    this.refs['input'].value = ''
+    this.props.onAddItem(`this.refs['input'].value`)
+    `this.refs['input'].value = ''`
 }
 
 render() {
@@ -1027,8 +1027,8 @@ render() {
 ```
 describe('submitting', () => {
     it('should call the callback and clear the input on clicking the button', () => {
-        const onAddItem = spy()
-        const wrapper = mount(<TodoInput onAddItem={onAddItem} />)
+        const onAddItemSpy = spy()
+        const wrapper = mount(<TodoInput onAddItem={onAddItemSpy} />)
 
         // .get returns the actual DOM (or ReactElement) node
         wrapper.find('input').get(0).value = 'test'
@@ -1036,7 +1036,7 @@ describe('submitting', () => {
         wrapper.find('input').simulate('change')
         wrapper.find('form').simulate('submit')
 
-        expect(onAddItem).to.have.been.calledWith('test')
+        expect(onAddItemSpy).to.have.been.calledWith('test')
         expect(wrapper.find('input').get(0).value).to.equal('')
     })
 })
@@ -1157,12 +1157,15 @@ describe('adding items (using mount)', () => {
     it('should add items to a list', () => {
         const wrapper = mount(<TodoApp />)
 
+        // Add an item
         wrapper.find('input').get(0).value = 'test 1'
         wrapper.find('input').simulate('change')
         wrapper.find('form').simulate('submit')
 
-        expect(wrapper).to.have.exactly(items.length).descendants('li')
+        // Check one item has been added to the list
+        expect(wrapper).to.have.exactly(1).descendants('li')
 
+        // Get the ReactWrapper for the 0'th item and check it has the correct text
         const itemLi = wrapper.find('li').at(0)
         expect(itemLi).to.contain.text('test 1')
         expect(itemLi).to.contain.text('Done')
@@ -1606,7 +1609,7 @@ describe('goto next step', () => {
 
 --
 
-* Use mocking/injection where required but keep it simple (e.g. inject non-deterministic functions in as arguments with default values)
+* Use mocking/injection where required but keep it simple (e.g. inject external/non-deterministic functions in as arguments with default values)
 
 ```
 function encryptStuff(data, encryptFn = encrypt) {
@@ -1624,6 +1627,8 @@ function encryptStuff(data, encryptFn = encrypt) {
 
 * Example code: http://bit.ly/ReactTestingCode
 
+<br/>
+
 * `mocha`: https://mochajs.org/
 
 * `chai`: http://chaijs.com
@@ -1632,6 +1637,9 @@ function encryptStuff(data, encryptFn = encrypt) {
 
 * `chai-enzyme`: https://github.com/producthunt/chai-enzyme
 
+<br/>
+
+* <a href="tom@tomduncalf.com">tom@tomduncalf.com</a> / <a href="https://twitter.com/tomduncalf">@tomduncalf</a>
 ???
 * https://blog.algolia.com/how-we-unit-test-react-components-using-expect-jsx/
 * http://googletesting.blogspot.co.uk/2015/04/just-say-no-to-more-end-to-end-tests.html
