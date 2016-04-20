@@ -83,38 +83,24 @@ class: center, middle
 ### Why unit test?
 
 --
-* Check our code behaves as we expect it to
 
---
+* Check our code behaves as we expect it to
 
 * Check our code handles edge cases/errors correctly
 
---
-
 * Check our code is syntactically correct (especially in a dynamic language)
-
---
 
 * Reduce dependency on end-to-end tests - faster, pinpoint failure better
 
---
-
 * Tests act as "executable documentation" for our code
-
---
 
 * Enables refactoring with confidence
 
---
-
+???
 * Helps writing code where inputs and outputs are known but method isn't
-
---
 
 * Can help us write better code
 
-
-???
 Dev's opinions on unit testing run from "won't write anything without a unit test" to "won't write a unit test for anything"
 Does represent extra effort so why should we do it?
 
@@ -494,6 +480,7 @@ export default class TodoApp extends React.Component {
         this.state = { items: [] }
     }
 
+    // item looks like: { item: 'Whatever', done: false }
     addItem(item) {
         this.setState({ items: this.state.items.concat([{ item }]) })
     }
@@ -585,7 +572,7 @@ chai.use(chaiEnzyme())
 
 --
 
-* Add `test` script to `paackage.json` to require test helper, load Babel compiler, set path for "absolute" includes and then execute all `*.spec.js*` files in `src`
+* Add `test` script to `package.json` to require test helper, load Babel compiler, set path for "absolute" includes and then execute all `*.spec.js*` files in `src`
 
 ```
 "scripts": {
@@ -706,7 +693,9 @@ describe('TodoInput', () => {
 
         // Note HTML tag names go in quotes
         expect(wrapper).to.have.exactly(1).descendants('form')
-        // We can use .find to select children and make assertions about them
+
+        // .find() also returns a ReactWrapper, so we can use it to select children
+        // and make assertions about them with the same API as shallow()
         expect(wrapper.find('form')).to.have.exactly(1).descendants('input')
         expect(wrapper.find('form')).to.have.exactly(1).descendants('button')
     })
@@ -778,7 +767,7 @@ describe('TodoItem', () => {
 
 ### Testing: rendering TodoItem - naming tests
 
-* We can use test names to describe intended behaviour - "executable documentation"
+* Use test names to describe intended behaviour - "executable documentation"
 
 ```html
 <li>
@@ -791,8 +780,8 @@ describe('TodoItem', () => {
 import TodoItem from './TodoItem'
 
 describe('TodoItem', () => {
-*   it('should render the item as not done if "done" is not passed in', () => {
-        const wrapper = shallow(<TodoItem `item={{ item: 'Test' }}` />)
+*   it('should render the item as not done if item has no "done" property', () => {
+        const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
 
         expect(wrapper).to.have.exactly(1).descendants('li')
 
@@ -823,7 +812,7 @@ describe('TodoItem', () => {
 }
 
 describe('TodoItem', () => {
-    it('should render the item as not done if "done" is not passed in', () => {
+    it('should render the item as not done if item has no "done" property', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
 *       assertItem(wrapper, 'Test', 'Done')
     })
@@ -862,7 +851,7 @@ function assertItem(wrapper, text, `done`) {
 }
 
 describe('TodoItem', () => {
-    it('should render the item as not done if "done" is not passed in', () => {
+    it('should render the item as not done if item has no "done" property', () => {
         const wrapper = shallow(<TodoItem item={{ item: 'Test' }} />)
         assertItem(wrapper, 'Test', `true`)
     })
@@ -898,7 +887,7 @@ haven't tested interaction yet - will come back to it
 
 ```
 const getWrapper = (items) =>
-    shallow(<TodoList items={items} `onItemDone={() => {}}` />)
+    shallow(<TodoList items={items} `onItemDone={() =>` `{}}` />)
 
 describe('TodoList', () => {
     it('should render no items for an empty list', () => {
@@ -914,7 +903,7 @@ describe('TodoList', () => {
 
         expect(wrapper).to.have.exactly(1).descendants('ul')
         expect(wrapper.find('ul')).to.have.exactly(2).descendants(TodoItem)
-        // .at returns a ReactWrapper
+        // .at returns a ReactWrapper (vs .get which returns the actual element)
         expect(wrapper.find(TodoItem).at(0).prop('item')).to.deep.equal(items[0])
         expect(wrapper.find(TodoItem).at(1).prop('item')).to.deep.equal(items[1])
     })
@@ -925,9 +914,21 @@ describe('TodoList', () => {
 
 ### Testing: interaction with `TodoItem`
 
-* Wtih `sinon` and `sinon-chai` we can use a `spy` to verify callback was called
+```html
+<li>
+    <span className={item.done ? 'done' : ''}>{this.props.item.item}</span>
+    <a href='#' `onClick={onDone}`>{ this.props.item.done ? 'Not done' : 'Done' }</a>
+</li>
+```
 
 --
+
+* `ReactWrapper` has a `simulate` method to simulate events (e.g. click)
+
+* With `sinon` and `sinon-chai` we can use a `spy` to verify a callback was called (a spy wraps a function and logs every time it is called)
+
+--
+
 
 ```
 describe('TodoItem', () => {
@@ -937,12 +938,12 @@ describe('TodoItem', () => {
 
     describe('clicking done', () => {
         it('should call the onDone callback when clicking "Done"', () => {
-            const onDone = spy()
-            const wrapper = shallow(<TodoItem item={{ item: '1' }} onDone={onDone} />)
+            `const onDone = spy()`
+            const wrapper = shallow(<TodoItem item={{ item: '1' }} `onDone={onDone}` />)
 
-            wrapper.find('a').simulate('click')
+            wrapper.find('a').`simulate('click')`
 
-            expect(onDone).to.have.been.calledOnce
+            `expect(onDone).to.have.been.calledOnce`
         })
     })
 })
@@ -953,15 +954,36 @@ describe('TodoItem', () => {
 
 ### Testing: interaction with `TodoInput`
 
-* We need to interact with the DOM - not supported with `shallow`, so we need to use `mount` ...
+* We need to interact with the DOM to work with the input's `value` - not supported with `shallow`, so we need to use `mount` to fully render the component
+
+```
+addItem(e) {
+    e.preventDefault()
+    this.props.onAddItem(this.refs['input'].value)
+    this.refs['input'].value = ''
+}
+
+render() {
+    return <form onSubmit={this.addItem.bind(this)}>
+        Add item: <input type='text' ref='input' /> <button type='submit'>Add</button>
+    </form>
+}
+```
+
 
 --
 
-* ... which requires a DOM. We can use `jsdom`, a JS implementation of the DOM spec, rather than having to use a real browser.
+* This requires a DOM - we can use `jsdom`, a JS implementation of the DOM spec
 
---
+---
 
-* Add to `test/helper.js` (from [here](https://github.com/airbnb/enzyme/blob/master/docs/guides/jsdom.md)):
+### Testing: interaction with `TodoInput`
+
+* We need to interact with the DOM to work with the input's `value` - not supported with `shallow`, so we need to use `mount` to fully render the component
+
+* This requires a DOM - we can use `jsdom`, a JS implementation of the DOM spec
+
+* Add the following setup code to `test/helper.js` (from [here](https://github.com/airbnb/enzyme/blob/master/docs/guides/jsdom.md)):
 
 ```
 import { jsdom } from 'jsdom'
@@ -1010,7 +1032,7 @@ describe('submitting', () => {
 
         // .get returns the actual DOM (or ReactElement) node
         wrapper.find('input').get(0).value = 'test'
-        // .simulate is called on the ReactWrapper
+        // .simulate is called on the ReactWrapper rather than the actual node
         wrapper.find('input').simulate('change')
         wrapper.find('form').simulate('submit')
 
@@ -1021,7 +1043,7 @@ describe('submitting', () => {
 ```
 ---
 
-### Testing: `TodoApp`
+### Testing: `TodoApp` behaviour
 
 * We want to test that items are properly added and marked as done
 
@@ -1044,9 +1066,7 @@ render() {
 }
 ```
 
----
-
-### Testing: `TodoApp`
+--
 
 * One approach could be to test that the callbacks change the state:
 
@@ -1054,7 +1074,7 @@ render() {
 describe('adding items (by calling callbacks and checking state)', () => {
     it('should add an item to an empty list', () => {
         const wrapper = shallow(<TodoApp />)
-
+        // get the bound callback and call it with 'test'
         wrapper.find(TodoInput).at(0).prop('onAddItem')('test')
         expect(wrapper.state('items')).to.deep.equal([{ item: 'test' }])
     })
@@ -1063,7 +1083,7 @@ describe('adding items (by calling callbacks and checking state)', () => {
 
 ---
 
-### Testing: `TodoApp`
+### Testing: `TodoApp` behaviour
 
 * One approach could be to test that the callbacks change the state:
 
@@ -1089,7 +1109,7 @@ describe('adding items (by calling callbacks and checking state)', () => {
 
 ---
 
-### Testing: `TodoApp`
+### Testing: `TodoApp` behaviour
 
 * One approach could be to test that the callbacks change the state:
 

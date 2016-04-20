@@ -10,6 +10,7 @@ export default class TodoInput extends React.Component {
     render() {
         return <form onSubmit={this.addItem.bind(this)}>
             Add item: <input type='text' ref='input' />
+            <button type='submit'>Add</button>
         </form>
     }
 }
